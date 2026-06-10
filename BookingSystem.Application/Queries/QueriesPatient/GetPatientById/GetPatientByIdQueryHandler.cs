@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the read-side application flow for GetPatientByIdQueryHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
 using BookingSystem.Infrastructure;

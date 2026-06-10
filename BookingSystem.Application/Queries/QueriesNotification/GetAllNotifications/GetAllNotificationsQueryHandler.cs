@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Defines the read-side application flow for GetAllNotificationsQueryHandler.
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +27,8 @@ public class GetAllNotificationsQueryHandler : IRequestHandler<GetAllNotificatio
                 NotificationId = n.NotificationId,
                 Message = n.Message,
                 SentAt = n.SentAt,
-                RecipientId = n.RecipientId
+                RecipientId = n.RecipientId,
+                IsRead = n.IsRead
             })
             .ToListAsync(cancellationToken);
     }

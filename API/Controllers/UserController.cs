@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Commands.UserCommands.DeleteUser;
+﻿// Backend purpose: Exposes HTTP endpoints for the UserController backend feature.
+using BookingSystem.Application.Commands.UserCommands.DeleteUser;
 using BookingSystem.Application.Commands.UserCommands.UpdateUser;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.GetAllUsers;

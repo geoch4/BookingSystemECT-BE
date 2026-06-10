@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Defines the read-side application flow for GetPatientByIdQuery.
+using BookingSystem.Application.DTO;
 using MediatR;
 
 namespace BookingSystem.Application.Queries.QueriesPatient.GetPatientById;

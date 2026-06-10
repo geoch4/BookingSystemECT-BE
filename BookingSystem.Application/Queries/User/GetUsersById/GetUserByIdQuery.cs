@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Common;
+﻿// Backend purpose: Defines the read-side application flow for GetUserByIdQuery.
+using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using MediatR;
 

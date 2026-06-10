@@ -1,5 +1,5 @@
-﻿using BookingSystem.Infrastructure.Fakers;
-
+// Backend purpose: Creates required development data when the database starts without it.
+using BookingSystem.Infrastructure.Fakers;
 
 namespace BookingSystem.Infrastructure.DataBase
 {
@@ -14,7 +14,7 @@ namespace BookingSystem.Infrastructure.DataBase
 
         public void SeedData()
         {
-            // Kontrollera om roller redan finns innan du lägger till dem
+            // Seed roles first because users depend on valid role identifiers.
             if (!_context.Roles.Any())
             {
                 var roleFaker = new RoleFaker();
@@ -23,7 +23,7 @@ namespace BookingSystem.Infrastructure.DataBase
             }
             _context.SaveChanges();
 
-            // Kontrollera om användare redan finns innan du lägger till dem
+            // Seed users after roles so generated foreign keys are valid.
             if (!_context.Users.Any())
             {
                 var userFaker = new UserFaker();
@@ -32,16 +32,17 @@ namespace BookingSystem.Infrastructure.DataBase
             }
             _context.SaveChanges();
 
-            // Liknande kontroller för andra entiteter...
+            // Documents require existing users as upload owners.
             if (!_context.Documents.Any())
             {
                 var documentFaker = new DocumentFaker();
-                var fakeUsers = _context.Users.ToList(); // Använd befintliga användare
+                var fakeUsers = _context.Users.ToList();
                 var fakeDocuments = documentFaker.GenerateDocument(fakeUsers).Generate(10);
                 _context.Documents.AddRange(fakeDocuments);
             }
             _context.SaveChanges();
 
+            // Patients are required before generated bookings can be created.
             if (!_context.Patients.Any())
             {
                 var patientFaker = new PatientFaker();
@@ -50,30 +51,20 @@ namespace BookingSystem.Infrastructure.DataBase
             }
             _context.SaveChanges();
 
-            if (!_context.TreatmentTypes.Any())
-            {
-                var treatmentTypeFaker = new TreatmentTypeFaker();
-                var fakeTreatmentTypes = treatmentTypeFaker.GenerateTreatmentType().Generate(5);
-                _context.TreatmentTypes.AddRange(fakeTreatmentTypes);
-            }
-
-            // Spara till databasen
-            _context.SaveChanges();
-
+            // Bookings are development data only and are generated when the table has no rows.
             if (!_context.Bookings.Any())
             {
                 var bookingFaker = new BookingFaker();
                 var fakeBookings = bookingFaker
                     .GenerateBooking(
                         _context.Patients.ToList(),
-                        _context.TreatmentTypes.ToList(),
                         _context.Users.ToList())
                     .Generate(10);
                 _context.Bookings.AddRange(fakeBookings);
             }
             _context.SaveChanges();
 
-
+            // Notifications depend on existing recipients.
             if (!_context.Notifications.Any())
             {
                 var notificationFaker = new NotificationFaker();
@@ -83,9 +74,6 @@ namespace BookingSystem.Infrastructure.DataBase
                 _context.Notifications.AddRange(fakeNotifications);
             }
             _context.SaveChanges();
-
-
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using BookingSystem.Domain.Entities;
+﻿// Backend purpose: Defines the persistence contract for INotificationRepository.
+using BookingSystem.Domain.Entities;
 
 namespace BookingSystem.Infrastructure.IRepository
 {

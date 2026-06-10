@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Defines the application service contract for IRoleService.
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
 

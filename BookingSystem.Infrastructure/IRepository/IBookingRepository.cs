@@ -1,4 +1,5 @@
-﻿using BookingSystem.Domain.Entities;
+﻿// Backend purpose: Defines the persistence contract for IBookingRepository.
+using BookingSystem.Domain.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

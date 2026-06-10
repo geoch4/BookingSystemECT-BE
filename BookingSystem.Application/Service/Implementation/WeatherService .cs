@@ -1,4 +1,5 @@
-﻿//using System.Net.Http;
+﻿// Backend purpose: Implements application service behavior for WeatherService.
+//using System.Net.Http;
 //using System.Net.Http.Json;
 //using System.Threading.Tasks;
 
@@ -20,17 +21,17 @@
 
 //        public async Task<WeatherData> GetWeatherAsync(string city)
 //        {
-//            // Exempel-URL; byt ut med ett riktigt API-anrop och API-nyckel om det behövs
+//            // Example URL; replace it with a configured provider and secret before enabling this service.
 //            var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid=YOUR_API_KEY&units=metric";
 //            var weatherData = await _httpClient.GetFromJsonAsync<WeatherData>(url);
 //            return weatherData;
 //        }
 //    }
 
-//    // Exempel på modell för väderdata
+//    // Example model for weather data.
 //    public class WeatherData
 //    {
-//        public string Name { get; set; }  // Stadens namn
+//        public string Name { get; set; }  // City name.
 //        public MainWeather Main { get; set; }
 //        public WeatherDescription[] Weather { get; set; }
 //    }

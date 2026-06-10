@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the write-side application flow for CreateDocumentCommandHandler.
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.Common;

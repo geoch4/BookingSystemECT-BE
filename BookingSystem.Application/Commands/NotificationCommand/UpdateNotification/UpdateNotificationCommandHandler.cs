@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the write-side application flow for UpdateNotificationCommandHandler.
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Infrastructure;
@@ -25,7 +26,7 @@ public class UpdateNotificationCommandHandler : IRequestHandler<UpdateNotificati
 
         notification.Message = request.Dto.Message;
         notification.RecipientId = request.Dto.RecipientId;
-        notification.SentAt = DateTime.UtcNow;
+        notification.IsRead = request.Dto.IsRead;
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;

@@ -1,4 +1,5 @@
-﻿using BookingSystem.Domain.Entities;
+﻿// Backend purpose: Defines the persistence contract for IRoleRepository.
+using BookingSystem.Domain.Entities;
 
 namespace BookingSystem.Infrastructure.IRepository
 {

@@ -43,7 +43,6 @@
 - [ ] Fyll i ditt namn i behovsanalysen (v2.docx)
 - [ ] Fyll i enhetschefens namn i behovsanalysen
 - [ ] Skriv styrelseprotokoll för GMed Consulting AB (IP-ägarskap)
-- [ ] Polera prototypen inför första mötet
 
 ### Möten att boka
 - [ ] 30 min med Max Rindby — råd och introduktion
@@ -140,9 +139,8 @@
 ## 📋 GitHub-repo
 
 - [ ] Repo skapat: `gmed-ect-rtms-system` (privat)
-- [ ] Mappstruktur skapad (docs, prototype, presentations, architecture)
+- [ ] Mappstruktur skapad (docs, presentations, architecture)
 - [ ] Filer uppladdade:
-  - [ ] `prototype/ect_rtms_dashboard.jsx`
   - [ ] `docs/VGR_Behovsanalys_ECT_rTMS_v2.docx`
   - [ ] `presentations/ECT_rTMS_Enhetschef_Presentation_v2.pptx`
   - [ ] `PROJECT_OVERVIEW.md`

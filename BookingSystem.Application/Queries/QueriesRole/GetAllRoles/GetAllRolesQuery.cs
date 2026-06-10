@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Defines the read-side application flow for GetAllRolesQuery.
+using BookingSystem.Application.DTO;
 using MediatR;
 using System.Collections.Generic;
 

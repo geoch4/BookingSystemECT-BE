@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines a cross-cutting MediatR pipeline behavior for LoggingBehavior.
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -12,6 +13,8 @@ public class LoggingBehavior < TRequest, TResponse> :IPipelineBehavior<TRequest,
         CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
+
+        // Mark the start and completion of each MediatR request during local diagnostics.
         Console.WriteLine($"[START] {requestName}");
         
         var response = await next();

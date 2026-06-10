@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Implements application service behavior for UserService.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,7 +66,7 @@ namespace BookingSystem.Application.Service.Implementation
             var user = await _repository.GetByIdAsync(userId);
             if (user == null) return false;
             
-            //kollar om någon annan användaren har samma e-post
+            // Prevent another user from taking an email address that is already in use.
             var existingUser = await _repository.GetByEmailAsync(dto.Email);
             if (existingUser != null && existingUser.UserId != userId)
             {
@@ -81,13 +82,13 @@ namespace BookingSystem.Application.Service.Implementation
         
         public async Task<bool> DeleteUserAsync(int id)
         {
-            // Kontrollera om användaren finns
+            // Check whether the user exists.
             var user = await _repository.GetByIdAsync(id);
-            // Om användaren inte finns, returnera false
+            // Return false when no matching user exists.
             if (user == null) return false;
-            // Ta bort användaren
+            // Remove an existing user.n
             await _repository.DeleteAsync(user);
-            // Returnera true för att indikera att borttagningen lyckades
+            // Return true after the repository confirms deletion.
             return true;
         }
     }

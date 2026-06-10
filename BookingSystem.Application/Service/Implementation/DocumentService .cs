@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Implements application service behavior for DocumentService.
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
@@ -57,7 +58,7 @@ namespace BookingSystem.Application.Service.Implementation
 
         public async Task<IEnumerable<DocumentDto>> GetAllDocumentsAsync()
         {
-            // Hämta alla dokument utan filtrering eller sortering
+            // Retrieve all documents without applying filters or ordering.
             var documents = await _context.Documents.ToListAsync();
             return documents.Select(d => new DocumentDto
             {

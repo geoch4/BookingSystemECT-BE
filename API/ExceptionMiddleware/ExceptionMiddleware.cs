@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿// Backend purpose: Converts application and unexpected exceptions into consistent HTTP responses.
+using System.Net;
 using System.Text.Json;
 using BookingSystem.Application.Exceptions;
 
@@ -9,7 +10,7 @@ public class ExceptionMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionMiddleware> _logger;
 
-    // ExceptionMiddleware - 
+    // The middleware receives the next pipeline step and a logger for unexpected failures.
     public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
@@ -20,10 +21,12 @@ public class ExceptionMiddleware
     {
         try
         {
+            // Continue through the pipeline when the request can be handled normally.
             await _next(context);
         }
         catch (AppException ex)
         {
+            // Controlled application errors are safe to return as client-facing bad requests.
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             context.Response.ContentType = "application/json";
             var result = JsonSerializer.Serialize(new { message = ex.Message });
@@ -31,6 +34,7 @@ public class ExceptionMiddleware
         }
         catch(Exception ex)
         {
+            // Unexpected errors are logged before a generic server error response is written.
             _logger.LogError(ex, "Unhandled exception occurred.");
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";

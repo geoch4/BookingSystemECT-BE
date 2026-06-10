@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Commands.PatientCommand.CreatePatient;
+﻿// Backend purpose: Exposes HTTP endpoints for the PatientController backend feature.
+using BookingSystem.Application.Commands.PatientCommand.CreatePatient;
 using BookingSystem.Application.Commands.PatientCommand.DeletePatient;
 using BookingSystem.Application.Commands.PatientCommand.UpdatePatient;
 using BookingSystem.Application.DTO;
@@ -9,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-// TODO: Lägga till operational Result
-// TODO: Jag behöver även lägga till OP i Min Madiatr, handlers
+// TODO: Return OperationResult consistently from this controller flow.
+// TODO: Align the corresponding MediatR handlers with OperationResult.
 
 [ApiController]
 [Route("api/[controller]")]

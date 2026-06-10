@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Backend purpose: Defines the persisted domain entity Notification.
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingSystem.Domain.Entities
 {
@@ -14,5 +15,6 @@ namespace BookingSystem.Domain.Entities
 
         public int RecipientId { get; set; }
         public User Recipient { get; set; } 
+        public bool IsRead { get; set; }
     }
 }

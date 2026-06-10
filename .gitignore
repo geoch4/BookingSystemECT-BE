@@ -2,6 +2,8 @@
 .vs/
 bin/
 obj/
+artifacts/
+.tmp-*-build/
 
 ## Användarspecifika filer
 *.user

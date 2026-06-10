@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Implements application service behavior for BookingService.
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
@@ -26,11 +27,14 @@ namespace BookingSystem.Application.Service.Implementation
                 BookingId = booking.BookingId,
                 Date = booking.Date,
                 PatientId = booking.PatientId,
-                TreatmentTypeId = booking.TreatmentTypeId,
+                TreatmentType = booking.TreatmentType,
                 CreatedById = booking.CreatedByUserId,
                 CreatedAt = booking.CreatedAt,
                 Priority = booking.Priority,
-                Status = booking.Status
+                Status = booking.Status,
+                ReferralDepartment = booking.ReferralDepartment,
+                ReferralContactName = booking.ReferralContactName,
+                ReferralContactPhone = booking.ReferralContactPhone
             };
         }
 
@@ -42,11 +46,14 @@ namespace BookingSystem.Application.Service.Implementation
                 BookingId = b.BookingId,
                 Date = b.Date,
                 PatientId = b.PatientId,
-                TreatmentTypeId = b.TreatmentTypeId,
+                TreatmentType = b.TreatmentType,
                 CreatedById = b.CreatedByUserId,
                 CreatedAt = b.CreatedAt,
                 Priority = b.Priority,
-                Status = b.Status
+                Status = b.Status,
+                ReferralDepartment = b.ReferralDepartment,
+                ReferralContactName = b.ReferralContactName,
+                ReferralContactPhone = b.ReferralContactPhone
             });
         }
 
@@ -56,11 +63,14 @@ namespace BookingSystem.Application.Service.Implementation
             {
                 Date = dto.Date,
                 PatientId = dto.PatientId,
-                TreatmentTypeId = dto.TreatmentTypeId,
+                TreatmentType = dto.TreatmentType,
                 CreatedByUserId = dto.CreatedById,
                 CreatedAt = dto.CreatedAt,
                 Priority = dto.Priority,
-                Status = dto.Status
+                Status = dto.Status,
+                ReferralDepartment = dto.ReferralDepartment,
+                ReferralContactName = dto.ReferralContactName,
+                ReferralContactPhone = dto.ReferralContactPhone
             };
 
             await _repository.AddAsync(booking);
@@ -69,11 +79,14 @@ namespace BookingSystem.Application.Service.Implementation
                 BookingId = booking.BookingId,
                 Date = booking.Date,
                 PatientId = booking.PatientId,
-                TreatmentTypeId = booking.TreatmentTypeId,
+                TreatmentType = booking.TreatmentType,
                 CreatedById = booking.CreatedByUserId,
                 CreatedAt = booking.CreatedAt,
                 Priority = booking.Priority,
-                Status = booking.Status
+                Status = booking.Status,
+                ReferralDepartment = booking.ReferralDepartment,
+                ReferralContactName = booking.ReferralContactName,
+                ReferralContactPhone = booking.ReferralContactPhone
             };
         }
 
@@ -83,11 +96,14 @@ namespace BookingSystem.Application.Service.Implementation
 
             booking.Date = dto.Date;
             booking.PatientId = dto.PatientId;
-            booking.TreatmentTypeId = dto.TreatmentTypeId;
+            booking.TreatmentType = dto.TreatmentType;
             booking.CreatedByUserId = dto.CreatedById;
             booking.CreatedAt = dto.CreatedAt;
             booking.Priority = dto.Priority;
             booking.Status = dto.Status;
+            booking.ReferralDepartment = dto.ReferralDepartment;
+            booking.ReferralContactName = dto.ReferralContactName;
+            booking.ReferralContactPhone = dto.ReferralContactPhone;
 
             await _repository.UpdateAsync(booking);
             return true;

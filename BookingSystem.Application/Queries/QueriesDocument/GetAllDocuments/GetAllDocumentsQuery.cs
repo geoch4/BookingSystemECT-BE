@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Defines the read-side application flow for GetAllDocumentsQuery.
+using System.Collections.Generic;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using MediatR;

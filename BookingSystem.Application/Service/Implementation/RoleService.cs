@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Implements application service behavior for RoleService.
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the write-side application flow for CreateRoleCommandHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
 using BookingSystem.Domain.Entities;

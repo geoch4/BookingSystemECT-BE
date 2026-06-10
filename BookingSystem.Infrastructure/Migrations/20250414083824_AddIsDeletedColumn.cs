@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Applies the database schema change 20250414083824_AddIsDeletedColumn.
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

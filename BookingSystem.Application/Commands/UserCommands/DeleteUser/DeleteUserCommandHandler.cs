@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the write-side application flow for DeleteUserCommandHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.Commands.UserCommands.DeleteUser;
 using BookingSystem.Infrastructure;

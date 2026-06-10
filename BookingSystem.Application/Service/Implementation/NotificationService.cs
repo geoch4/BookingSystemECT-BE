@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Implements application service behavior for NotificationService.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
