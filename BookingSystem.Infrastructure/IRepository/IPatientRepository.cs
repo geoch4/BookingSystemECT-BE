@@ -1,4 +1,5 @@
-﻿    using System;
+﻿// Backend purpose: Defines the persistence contract for IPatientRepository.
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;

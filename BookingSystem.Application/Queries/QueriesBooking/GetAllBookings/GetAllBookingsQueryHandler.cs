@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Defines the read-side application flow for GetAllBookingsQueryHandler.
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +29,16 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, O
                 BookingId = b.BookingId,
                 Date = b.Date,
                 PatientId = b.PatientId,
-                TreatmentTypeId = b.TreatmentTypeId,
+                TreatmentType = b.TreatmentType,
                 CreatedById = b.CreatedByUserId,
                 CreatedAt = b.CreatedAt,
                 Priority = b.Priority,
-                Status = b.Status
+                Status = b.Status,
+                HealthDeclarationStatus = b.HealthDeclarationStatus,
+                AnesthesiaAssessmentStatus = b.AnesthesiaAssessmentStatus,
+                ReferralDepartment = b.ReferralDepartment,
+                ReferralContactName = b.ReferralContactName,
+                ReferralContactPhone = b.ReferralContactPhone
             })
             .ToList();
         

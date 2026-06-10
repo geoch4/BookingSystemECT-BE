@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Commands.UserCommands.CreateUser;
+﻿// Backend purpose: Exposes HTTP endpoints for the AuthController backend feature.
+using BookingSystem.Application.Commands.UserCommands.CreateUser;
 using BookingSystem.Application.Commands.UserCommands.LogInUser;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
@@ -39,7 +40,7 @@ namespace API.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            // Alternativt: return Created(...) med OperationResult inuti
+            // Another option is to return Created(...) with the OperationResult payload.
             return Ok(result);
         }
     }

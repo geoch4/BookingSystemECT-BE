@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines a cross-cutting MediatR pipeline behavior for ExceptionHandlingBehavior.
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -16,8 +17,9 @@ public class ExceptionHandlingBehavior < TRequest, TResponse> : IPipelineBehavio
         }
         catch (Exception ex)
         {
+            // Record request context here, then preserve the original exception for API middleware.
             Console.WriteLine($"[EXCEPTION] {typeof(TRequest).Name}: {ex.Message}");
-            throw; // Skicka vidare felet till API:t
+            throw; // Rethrow so the API middleware can create the HTTP error response.
         }
     }
 }

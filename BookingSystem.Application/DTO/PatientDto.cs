@@ -1,16 +1,17 @@
-﻿
+﻿// Backend purpose: Defines API data contracts related to PatientDto.
+
 namespace BookingSystem.Application.DTO
 {
-    
-        public class PatientDto //get dto
-        {
-            public int PatientId { get; set; }
-            public string FullName { get; set; } = string.Empty;
-            public string SocialSecurityNumber { get; set; } = string.Empty;
-        }
-    
+    // Returned by patient read endpoints and includes the database identifier.
+    public class PatientDto
+    {
+        public int PatientId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string SocialSecurityNumber { get; set; } = string.Empty;
+    }
 
-    public class CreatePatientDto //post and put dto
+    // Accepted by patient create and update endpoints without exposing persistence fields.
+    public class CreatePatientDto
     {
         public string FullName { get; set; } = string.Empty;
         public string SocialSecurityNumber { get; set; } = string.Empty;

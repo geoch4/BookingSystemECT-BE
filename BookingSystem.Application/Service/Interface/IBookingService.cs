@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Defines the application service contract for IBookingService.
+using BookingSystem.Application.DTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

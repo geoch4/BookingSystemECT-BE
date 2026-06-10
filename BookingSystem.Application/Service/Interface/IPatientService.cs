@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the application service contract for IPatientService.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

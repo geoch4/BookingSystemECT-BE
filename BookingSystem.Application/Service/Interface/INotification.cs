@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Defines the application service contract for INotification.
+using BookingSystem.Application.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,5 @@
-﻿using BookingSystem.Domain.Entities;
+﻿// Backend purpose: Defines the persistence contract for IUserRepository.
+using BookingSystem.Domain.Entities;
 
 namespace BookingSystem.Infrastructure.IRepository
 {
@@ -7,9 +8,9 @@ namespace BookingSystem.Infrastructure.IRepository
         Task AddAsync(User user);
         Task<User?> GetByIdAsync(int id);
         Task<IEnumerable<User>> GetAllAsync();
-// I IUserRepository.cs
+// Persistence operations specific to users.
         Task<User?> GetByEmailAsync(string email);
-        Task UpdateAsync(User user);  // Uppdatera användare
-        Task DeleteAsync(User user);  // Ta bort användare
+        Task UpdateAsync(User user);  // Update an existing user.
+        Task DeleteAsync(User user);  // Remove an existing user.
     }
 }

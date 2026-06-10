@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿// Backend purpose: Defines authorization behavior for RoleRequirement.
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 

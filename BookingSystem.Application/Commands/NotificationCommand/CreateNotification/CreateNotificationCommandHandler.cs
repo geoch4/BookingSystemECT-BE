@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the write-side application flow for CreateNotificationCommandHandler.
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
@@ -23,7 +24,8 @@ public class CreateNotificationCommandHandler : IRequestHandler<CreateNotificati
         {
             Message = request.Dto.Message,
             RecipientId = request.Dto.RecipientId,
-            SentAt = DateTime.UtcNow
+            SentAt = DateTime.UtcNow,
+            IsRead = request.Dto.IsRead
         };
 
         _context.Notifications.Add(entity);
@@ -34,7 +36,8 @@ public class CreateNotificationCommandHandler : IRequestHandler<CreateNotificati
             NotificationId = entity.NotificationId,
             Message = entity.Message,
             SentAt = entity.SentAt,
-            RecipientId = entity.RecipientId
+            RecipientId = entity.RecipientId,
+            IsRead = entity.IsRead
         };
     }
 }

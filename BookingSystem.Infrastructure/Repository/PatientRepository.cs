@@ -1,4 +1,5 @@
-﻿using BookingSystem.Domain.Entities;
+﻿// Backend purpose: Implements database access for PatientRepository.
+using BookingSystem.Domain.Entities;
 using BookingSystem.Infrastructure;
 using BookingSystem.Infrastructure.IRepository;
 using Microsoft.EntityFrameworkCore;

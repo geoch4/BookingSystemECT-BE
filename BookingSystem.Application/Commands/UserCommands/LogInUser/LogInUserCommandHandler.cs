@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the write-side application flow for LogInUserCommandHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.Service.Implementation;

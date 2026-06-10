@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Commands.DocumentCommand.CreateDocument;
+﻿// Backend purpose: Exposes HTTP endpoints for the DocumentController backend feature.
+using BookingSystem.Application.Commands.DocumentCommand.CreateDocument;
 using BookingSystem.Application.Commands.DocumentCommand.DeleteDocument;
 using BookingSystem.Application.Commands.DocumentCommand.UpdateDocument;
 using BookingSystem.Application.DTO;

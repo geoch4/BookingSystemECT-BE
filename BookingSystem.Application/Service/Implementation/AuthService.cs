@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Implements application service behavior for AuthService.
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BookingSystem.Application.Commands.UserCommands.CreateUser;
@@ -27,7 +28,7 @@ public class AuthService
     public async Task<OperationResult<int>> RegisterAsync(CreateUserDto dto)
     {
         var result = await _mediator.Send(new CreateUserCommand(dto));
-        return result; // Returnera hela OperationResult, inte bara userId
+        return result; // Preserve the full operation result instead of returning only the user identifier.
     }
 
     public string GenerateJwtToken(int userId, string name, string? role)

@@ -1,4 +1,5 @@
-﻿
+﻿// Backend purpose: Defines API data contracts related to LoginDto.
+
 
 namespace BookingSystem.Application.DTO
 {

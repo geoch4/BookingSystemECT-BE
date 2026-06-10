@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Defines the write-side application flow for UpdateUserCommand.
+using BookingSystem.Application.DTO;
 using MediatR;
 
 namespace BookingSystem.Application.Commands.UserCommands.UpdateUser;

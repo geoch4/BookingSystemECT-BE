@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the persisted domain entity Document.
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;

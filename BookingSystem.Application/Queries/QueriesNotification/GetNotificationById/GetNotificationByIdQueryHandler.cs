@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the read-side application flow for GetNotificationByIdQueryHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
 using BookingSystem.Infrastructure;
@@ -26,7 +27,8 @@ public class GetNotificationByIdQueryHandler : IRequestHandler<GetNotificationBy
             NotificationId = n.NotificationId,
             Message = n.Message,
             SentAt = n.SentAt,
-            RecipientId = n.RecipientId
+            RecipientId = n.RecipientId,
+            IsRead = n.IsRead
         };
     }
 }

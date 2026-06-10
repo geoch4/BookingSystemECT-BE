@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.DTO;
+﻿// Backend purpose: Validates incoming data for UpdateUserDtoValidator before application logic runs.
+using BookingSystem.Application.DTO;
 using FluentValidation;
 
 namespace BookingSystem.Application.Validators;

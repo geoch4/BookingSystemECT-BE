@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines authorization behavior for RoleAuthorizationHandler.
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;

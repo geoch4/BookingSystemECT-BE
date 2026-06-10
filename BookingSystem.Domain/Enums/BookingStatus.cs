@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Backend purpose: Defines the allowed domain values for BookingStatus.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

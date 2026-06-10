@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Backend purpose: Defines the application service contract for IDocumentService.
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
 
@@ -8,7 +9,7 @@ namespace BookingSystem.Application.Services
     {
         Task<DocumentDto> CreateDocumentAsync(CreateDocumentDto dto);
         Task<DocumentDto?> GetDocumentByIdAsync(int dokumentId);
-        Task<IEnumerable<DocumentDto>> GetAllDocumentsAsync(); // Uppdaterad signatur
+        Task<IEnumerable<DocumentDto>> GetAllDocumentsAsync(); // Return all persisted document DTOs.
         Task<bool> UpdateDocumentAsync(int dokumentId, CreateDocumentDto dto);
         Task<bool> DeleteDocumentAsync(int dokumentId);
     }

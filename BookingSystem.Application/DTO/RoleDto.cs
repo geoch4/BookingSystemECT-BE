@@ -1,4 +1,5 @@
-﻿namespace BookingSystem.Application.DTO
+﻿// Backend purpose: Defines API data contracts related to RoleDto.
+namespace BookingSystem.Application.DTO
 {
     public class RoleDto
     {

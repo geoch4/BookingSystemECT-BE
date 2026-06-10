@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Commands.NotificationCommand.CreateNotification;
+﻿// Backend purpose: Exposes HTTP endpoints for the NotificationController backend feature.
+using BookingSystem.Application.Commands.NotificationCommand.CreateNotification;
 using BookingSystem.Application.Commands.NotificationCommand.DeleteNotification;
 using BookingSystem.Application.Commands.NotificationCommand.UpdateNotification;
 using BookingSystem.Application.DTO;
@@ -9,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-// TODO: Lägga till operational Result
-// TODO: Jag behöver även lägga till OP i Min Madiatr, handlers
+// TODO: Return OperationResult consistently from this controller flow.
+// TODO: Align the corresponding MediatR handlers with OperationResult.
 
 [ApiController]
 [Route("api/[controller]")]
@@ -39,10 +40,34 @@ public class NotificationController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllNotifications()
+    public async Task<IActionResult> GetAllNotifications([FromQuery] int? recipientId)
     {
         var notifications = await _mediator.Send(new GetAllNotificationsQuery());
+        // Callers can request only the current user's notifications instead of receiving every recipient's data.
+        if (recipientId.HasValue)
+            notifications = notifications.Where(n => n.RecipientId == recipientId.Value);
+
         return Ok(notifications);
+    }
+
+    [HttpPatch("{id:int}/read")]
+    public async Task<IActionResult> MarkAsRead(int id, CancellationToken cancellationToken)
+    {
+        var notification = await _mediator.Send(new GetNotificationByIdQuery(id), cancellationToken);
+        if (notification == null) return NotFound();
+
+        // Reuse the existing update command so read-state changes follow the same persistence path.
+        notification.IsRead = true;
+        var updated = await _mediator.Send(
+            new UpdateNotificationCommand(id, new CreateNotificationDto
+            {
+                Message = notification.Message,
+                RecipientId = notification.RecipientId,
+                IsRead = true
+            }),
+            cancellationToken);
+
+        return updated ? NoContent() : NotFound();
     }
 
     [HttpPut("{id}")]

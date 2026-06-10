@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Common;
+﻿// Backend purpose: Defines the write-side application flow for LogInUserCommand.
+using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using MediatR;
 

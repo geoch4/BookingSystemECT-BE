@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿// Backend purpose: Defines the read-side application flow for GetBookingByIdQueryHandler.
+using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
@@ -30,11 +31,16 @@ public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, O
             BookingId = b.BookingId,
             Date = b.Date,
             PatientId = b.PatientId,
-            TreatmentTypeId = b.TreatmentTypeId,
+            TreatmentType = b.TreatmentType,
             CreatedById = b.CreatedByUserId,
             CreatedAt = b.CreatedAt,
             Priority = b.Priority,
-            Status = b.Status
+            Status = b.Status,
+            HealthDeclarationStatus = b.HealthDeclarationStatus,
+            AnesthesiaAssessmentStatus = b.AnesthesiaAssessmentStatus,
+            ReferralDepartment = b.ReferralDepartment,
+            ReferralContactName = b.ReferralContactName,
+            ReferralContactPhone = b.ReferralContactPhone
         };
         
         return OperationResult<BookingDto>.Ok(dto);

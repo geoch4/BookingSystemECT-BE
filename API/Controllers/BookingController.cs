@@ -1,6 +1,8 @@
-﻿using BookingSystem.Application.Commands.BookingCommand.CreateBooking;
+﻿// Backend purpose: Exposes HTTP endpoints for the BookingController backend feature.
+using BookingSystem.Application.Commands.BookingCommand.CreateBooking;
 using BookingSystem.Application.Commands.BookingCommand.DeleteCommand;
 using BookingSystem.Application.Commands.BookingCommand.UpdateBooking;
+using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.QueriesBooking.GetAllBookings;
 using BookingSystem.Application.Queries.QueriesBooking.GetBookingById;
@@ -49,7 +51,11 @@ namespace API.Controllers
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
         {
             var result = await _mediator.Send(new CreateBookingCommand(dto));
-            
+
+            // A database-enforced slot collision is exposed as HTTP 409 to support concurrent clients.
+            if (!result.Success)
+                return Conflict(new { message = result.ErrorMessage });
+
             return CreatedAtAction(nameof(GetBookingById), new { id = result.Data!.BookingId }, result.Data);
         }
 
@@ -60,7 +66,13 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new UpdateBookingCommand(id, dto));
             if (!result.Success)
+            {
+                // Distinguish an occupied slot from a missing booking for an accurate HTTP response.
+                if (result.ErrorMessage == BookingErrors.SlotOccupied)
+                    return Conflict(new { message = result.ErrorMessage });
+
                 return NotFound(result.ErrorMessage);
+            }
 
             return NoContent();
         }

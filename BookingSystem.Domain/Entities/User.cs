@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Backend purpose: Defines the persisted domain entity User.
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingSystem.Domain.Entities
 {
@@ -14,7 +15,7 @@ namespace BookingSystem.Domain.Entities
         public string PasswordHash { get; set; } 
         public bool IsDeleted { get; set; } = false;
 
-        //navigation
+        // Navigation properties and foreign keys.
         public Role Role  { get; set; }
         public int RoleId { get; set; }
     }

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿// Backend purpose: Validates incoming data for CreateDocumentDtoValidator before application logic runs.
+using FluentValidation;
 using BookingSystem.Application.DTO;
 
 namespace BookingSystem.Application.Validators;

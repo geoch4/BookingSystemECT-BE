@@ -1,28 +1,26 @@
-﻿using BookingSystem.Application.Commands.RoleCommand.CreateRole;
+﻿// Backend purpose: Exposes HTTP endpoints for the RoleController backend feature.
+using BookingSystem.Application.Commands.RoleCommand.CreateRole;
 using BookingSystem.Application.Commands.RoleCommand.DeleteRole;
 using BookingSystem.Application.Commands.RoleCommand.UpdateRole;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.QueriesRole.GetRolesById;
 using BookingSystem.Application.Roles.Queries.GetAllRoles;
-using BookingSystem.Application.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 
-// TODO: Lägga till operational Result
-// TODO: Jag behöver även lägga till OP i Min Madiatr, handlers
+// TODO: Return OperationResult consistently from this controller flow.
+// TODO: Align the corresponding MediatR handlers with OperationResult.
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class RoleController : ControllerBase
     {
-        private readonly IRoleService _roleService;
         private readonly IMediator _mediator;
 
-        public RoleController(IRoleService roleService, IMediator mediator)
+        public RoleController(IMediator mediator)
         {
-            _roleService = roleService;
             _mediator = mediator;
         }
 

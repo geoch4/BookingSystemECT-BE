@@ -1,4 +1,5 @@
-﻿
+﻿// Backend purpose: Defines API data contracts related to UserDto.
+
 namespace BookingSystem.Application.DTO
 {
     public class UserDto

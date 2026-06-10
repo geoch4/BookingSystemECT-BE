@@ -1,4 +1,5 @@
-﻿using BookingSystem.Application.Common;
+﻿// Backend purpose: Defines the write-side application flow for CreateUsersCommand.
+using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using MediatR;
 

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿// Backend purpose: Defines the write-side application flow for DeleteBookingCommand.
+using MediatR;
 
 namespace BookingSystem.Application.Commands.BookingCommand.DeleteCommand;
 

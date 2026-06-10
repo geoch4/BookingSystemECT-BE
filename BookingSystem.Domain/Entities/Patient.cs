@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Backend purpose: Defines the persisted domain entity Patient.
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingSystem.Domain.Entities
 {

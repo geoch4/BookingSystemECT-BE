@@ -17,7 +17,7 @@ namespace BookingSystem.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.14")
+                .HasAnnotation("ProductVersion", "8.0.27")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -30,14 +30,21 @@ namespace BookingSystem.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
 
+                    b.Property<int>("AnesthesiaAssessmentStatus")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("int");
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("CreatedById");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("HealthDeclarationStatus")
+                        .HasColumnType("int");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
@@ -45,19 +52,33 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
+                    b.Property<string>("ReferralContactName")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("ReferralContactPhone")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("ReferralDepartment")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TreatmentTypeId")
+                    b.Property<int>("TreatmentType")
                         .HasColumnType("int");
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("CreatedById");
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Date")
+                        .IsUnique()
+                        .HasFilter("[Status] <> 2");
 
                     b.HasIndex("PatientId");
-
-                    b.HasIndex("TreatmentTypeId");
 
                     b.ToTable("Bookings");
                 });
@@ -99,6 +120,9 @@ namespace BookingSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
                     b.Property<int>("RecipientId")
                         .HasColumnType("int");
 
@@ -110,6 +134,55 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.HasIndex("RecipientId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.StaffingStatus", b =>
+                {
+                    b.Property<int>("StaffingStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffingStatusId"));
+
+                    b.Property<int>("AnesthesiaAvailable").HasColumnType("int");
+                    b.Property<int>("AnesthesiaRequired").HasColumnType("int");
+                    b.Property<TimeSpan?>("BreakEnd").HasColumnType("time");
+                    b.Property<TimeSpan?>("BreakStart").HasColumnType("time");
+                    b.Property<DateTime>("Date").HasColumnType("datetime2");
+                    b.Property<int>("DoctorsAvailable").HasColumnType("int");
+                    b.Property<int>("DoctorsRequired").HasColumnType("int");
+                    b.Property<int>("NursesAvailable").HasColumnType("int");
+                    b.Property<int>("NursesRequired").HasColumnType("int");
+                    b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
+
+                    b.HasKey("StaffingStatusId");
+
+                    b.HasIndex("Date").IsUnique();
+
+                    b.ToTable("StaffingStatuses");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.StandbyEntry", b =>
+                {
+                    b.Property<int>("StandbyEntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StandbyEntryId"));
+
+                    b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+                    b.Property<string>("Department").IsRequired().HasMaxLength(120).HasColumnType("nvarchar(120)");
+                    b.Property<bool>("IsActive").HasColumnType("bit");
+                    b.Property<int>("PatientId").HasColumnType("int");
+                    b.Property<int>("Urgency").HasColumnType("int");
+
+                    b.HasKey("StandbyEntryId");
+
+                    b.HasIndex("PatientId", "IsActive")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
+
+                    b.ToTable("StandbyEntries");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Patient", b =>
@@ -145,29 +218,11 @@ namespace BookingSystem.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
 
                     b.Property<string>("RoleName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.TreatmentType", b =>
-                {
-                    b.Property<int>("TreatmentTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TreatmentTypeId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TreatmentTypeId");
-
-                    b.ToTable("TreatmentTypes");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.User", b =>
@@ -207,7 +262,7 @@ namespace BookingSystem.Infrastructure.Migrations
                 {
                     b.HasOne("BookingSystem.Domain.Entities.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
+                        .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -217,17 +272,9 @@ namespace BookingSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BookingSystem.Domain.Entities.TreatmentType", "TreatmentType")
-                        .WithMany("Bookings")
-                        .HasForeignKey("TreatmentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Patient");
-
-                    b.Navigation("TreatmentType");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Document", b =>
@@ -252,6 +299,17 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Navigation("Recipient");
                 });
 
+            modelBuilder.Entity("BookingSystem.Domain.Entities.StandbyEntry", b =>
+                {
+                    b.HasOne("BookingSystem.Domain.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("BookingSystem.Domain.Entities.User", b =>
                 {
                     b.HasOne("BookingSystem.Domain.Entities.Role", "Role")
@@ -271,11 +329,6 @@ namespace BookingSystem.Infrastructure.Migrations
             modelBuilder.Entity("BookingSystem.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.TreatmentType", b =>
-                {
-                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

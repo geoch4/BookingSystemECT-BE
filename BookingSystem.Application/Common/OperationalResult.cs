@@ -1,4 +1,5 @@
-﻿namespace BookingSystem.Application.Common
+﻿// Backend purpose: Provides shared application behavior for OperationalResult.
+namespace BookingSystem.Application.Common
 {
     public class OperationResult<T>
     {
@@ -16,12 +17,12 @@
             ErrorMessage = errorMessage;
         }
 
-        // För lyckade operationer
+        // Create a successful operation result.
         public static OperationResult<T> Ok(T data, string? message = null)
             => new OperationResult<T>(true, data, message);
 
-        // För misslyckade operationer
+        // Create a failed operation result.
         public static OperationResult<T> Fail(string errorMessage)
-            => new OperationResult<T>(false, default, errorMessage);
+            => new OperationResult<T>(false, default, errorMessage: errorMessage);
     }
 }

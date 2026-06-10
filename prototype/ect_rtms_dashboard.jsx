@@ -30,15 +30,34 @@ const initialEctSlots = [
   { id: 12, time: "11:45", patient: "Svensson, Maj",     pnr: "195212041234", status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
 ];
 
+const initialAkutEctSlots = [
+  { id: 201, time: "13:00", patient: "Lindström, Åsa",    pnr: "197904234512", status: "akut",    blaaappen: false, halsodekl: true,  anestesi: true,  orbitStatus: "inväntar",   note: "AKUT – allvarligt försämrad" },
+  { id: 202, time: "13:15", patient: "Björk, Mikael",     pnr: "196203174567", status: "akut",    blaaappen: false, halsodekl: false, anestesi: true,  orbitStatus: "ej_skickad", note: "AKUT – vitalindikation" },
+  { id: 203, time: "13:30", patient: "Söderberg, Maj",    pnr: "195512041234", status: "varning", blaaappen: true,  halsodekl: false, anestesi: false, orbitStatus: null,         note: "Hälsodeklaration saknas" },
+  { id: 204, time: "13:45", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 205, time: "14:00", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 206, time: "14:15", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 207, time: "14:30", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 208, time: "14:45", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 209, time: "15:00", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 210, time: "15:15", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 211, time: "15:30", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+  { id: 212, time: "15:45", patient: "",                  pnr: "",             status: "ledig",   blaaappen: false, halsodekl: false, anestesi: false, orbitStatus: null,         note: "" },
+];
+
 const initialRtmsSlots = [
-  { id: 101, time: "13:00", patient: "Holm, Cecilia", pnr: "199205234512", dubbel: true, dubbelPair: 102, status: "klar", blaaappen: true },
-  { id: 102, time: "13:30", patient: "Holm, Cecilia", pnr: "199205234512", dubbel: true, dubbelPair: 101, status: "klar", blaaappen: true },
-  { id: 103, time: "13:15", patient: "Lund, Stig", pnr: "196710041234", dubbel: false, dubbelPair: null, status: "klar", blaaappen: false },
-  { id: 104, time: "14:00", patient: "Bergström, Lisa", pnr: "199812157891", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true },
-  { id: 105, time: "14:30", patient: "Fransson, Kurt", pnr: "197405234512", dubbel: true, dubbelPair: 106, status: "klar", blaaappen: true },
-  { id: 106, time: "15:00", patient: "Fransson, Kurt", pnr: "197405234512", dubbel: true, dubbelPair: 105, status: "klar", blaaappen: true },
-  { id: 107, time: "15:30", patient: "Åberg, Nina", pnr: "198612041234", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true },
-  { id: 108, time: "16:00", patient: "", pnr: "", dubbel: false, dubbelPair: null, status: "ledig", blaaappen: false },
+  { id: 101, time: "13:00", patient: "Holm, Cecilia",      pnr: "199205234512", dubbel: true,  dubbelPair: 102, status: "klar",  blaaappen: true  },
+  { id: 102, time: "13:30", patient: "Holm, Cecilia",      pnr: "199205234512", dubbel: true,  dubbelPair: 101, status: "klar",  blaaappen: true  },
+  { id: 103, time: "13:15", patient: "Lund, Stig",         pnr: "196710041234", dubbel: false, dubbelPair: null, status: "klar", blaaappen: false },
+  { id: 104, time: "14:00", patient: "Bergström, Lisa",    pnr: "199812157891", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true  },
+  { id: 105, time: "14:30", patient: "Fransson, Kurt",     pnr: "197405234512", dubbel: true,  dubbelPair: 106, status: "klar",  blaaappen: true  },
+  { id: 106, time: "15:00", patient: "Fransson, Kurt",     pnr: "197405234512", dubbel: true,  dubbelPair: 105, status: "klar",  blaaappen: true  },
+  { id: 107, time: "15:30", patient: "Åberg, Nina",        pnr: "198612041234", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true  },
+  { id: 108, time: "16:00", patient: "Wahlberg, Torsten",  pnr: "196007234512", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true  },
+  { id: 109, time: "16:30", patient: "Magnusson, Karin",   pnr: "198304127891", dubbel: false, dubbelPair: null, status: "klar", blaaappen: false },
+  { id: 110, time: "17:00", patient: "Andersson, Thomas",  pnr: "196809234512", dubbel: false, dubbelPair: null, status: "klar", blaaappen: true  },
+  { id: 111, time: "17:30", patient: "",                   pnr: "",             dubbel: false, dubbelPair: null, status: "ledig", blaaappen: false },
+  { id: 112, time: "18:00", patient: "",                   pnr: "",             dubbel: false, dubbelPair: null, status: "ledig", blaaappen: false },
 ];
 
 // ─── DOKUMENT DATA ────────────────────────────────────────────────────────────
@@ -185,13 +204,14 @@ function Pill({ text, color, bg }) {
   );
 }
 
-function TessaBar({ slots, tessa, rast }) {
+function TessaBar({ slots, akutSlots, rtmsSlots, tessa, rast }) {
   const narOk = tessa.narkos.ok;
+  const totalAkut = [...slots, ...akutSlots].filter(s => s.status === "akut").length;
   return (
     <div style={{
       background: C.tessa, color: "#fff",
-      padding: "8px 20px", display: "flex", gap: 32, alignItems: "center",
-      fontSize: 12, fontFamily: "'DM Mono', monospace",
+      padding: "8px 20px", display: "flex", gap: 24, alignItems: "center",
+      fontSize: 12, fontFamily: "'DM Mono', monospace", flexWrap: "wrap",
     }}>
       <span style={{ fontWeight: 700, fontSize: 13, letterSpacing: "0.06em" }}>
         TESSA <span style={{ opacity: 0.6, fontWeight: 400 }}>{tessa.lastFetch}</span>
@@ -212,11 +232,17 @@ function TessaBar({ slots, tessa, rast }) {
         </b>
       </span>
       <span style={{ marginLeft: "auto" }}>
-        ECT-kapacitet: <b>{slots.filter(s => s.status !== "ledig").length}/12</b>
+        ECT: <b>{slots.filter(s => s.status !== "ledig").length}/12</b>
       </span>
       <span>
-        Akuta: <b style={{ color: slots.some(s => s.status === "akut") ? "#FFB4B4" : "#7EFFC0" }}>
-          {slots.filter(s => s.status === "akut").length}
+        Akut ECT: <b>{akutSlots.filter(s => s.status !== "ledig").length}/12</b>
+      </span>
+      <span>
+        rTMS: <b>{rtmsSlots.filter(s => s.status !== "ledig").length}/12</b>
+      </span>
+      <span>
+        Akuta: <b style={{ color: totalAkut > 0 ? "#FFB4B4" : "#7EFFC0" }}>
+          {totalAkut}
         </b>
       </span>
     </div>
@@ -590,16 +616,17 @@ function RastBlock({ rast, onByt }) {
 
 export default function App() {
   const [ectSlots, setEctSlots] = useState(initialEctSlots);
+  const [akutEctSlots, setAkutEctSlots] = useState(initialAkutEctSlots);
   const [showStandby, setShowStandby] = useState(false);
   const [vacantSlotId, setVacantSlotId] = useState(null);
+  const [vacantBlock, setVacantBlock] = useState("ect"); // "ect" | "akutEct"
   const [showAkut, setShowAkut] = useState(false);
   const [toast, setToast] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [rastFonster, setRastFonster] = useState("A"); // "A" = 12:15-12:45, "B" = 12:30-13:00
+  const [rastFonster, setRastFonster] = useState("A");
 
-  // Check if akut exists on load
   useEffect(() => {
-    if (ectSlots.some(s => s.status === "akut")) {
+    if ([...ectSlots, ...akutEctSlots].some(s => s.status === "akut")) {
       setTimeout(() => setShowAkut(true), 900);
     }
   }, []);
@@ -609,25 +636,58 @@ export default function App() {
     setTimeout(() => setToast(null), 3500);
   }
 
+  function handleOrbit(id) {
+    setEctSlots(prev => prev.map(s =>
+      s.id === id ? { ...s, orbitStatus: "inväntar" } : s
+    ));
+    triggerToast("Anmälan skickad till Orbit.", "ok");
+  }
+
   function handleCancel(id) {
     setEctSlots(prev => prev.map(s =>
       s.id === id ? { ...s, status: "ledig", patient: "", pnr: "", note: "", blaaappen: false, halsodekl: false, anestesi: false } : s
     ));
     setVacantSlotId(id);
+    setVacantBlock("ect");
     triggerToast("Slot avbokad – öppna standby-listan för att fylla platsen.", "warn");
     setTimeout(() => setShowStandby(true), 600);
   }
 
   function handleFill(id) {
     setVacantSlotId(id);
+    setVacantBlock("ect");
+    setShowStandby(true);
+  }
+
+  function handleAkutOrbit(id) {
+    setAkutEctSlots(prev => prev.map(s =>
+      s.id === id ? { ...s, orbitStatus: "inväntar" } : s
+    ));
+    triggerToast("Anmälan skickad till Orbit.", "ok");
+  }
+
+  function handleAkutCancel(id) {
+    setAkutEctSlots(prev => prev.map(s =>
+      s.id === id ? { ...s, status: "ledig", patient: "", pnr: "", note: "", blaaappen: false, halsodekl: false, anestesi: false } : s
+    ));
+    setVacantSlotId(id);
+    setVacantBlock("akutEct");
+    triggerToast("Akut-slot avbokad.", "warn");
+    setTimeout(() => setShowStandby(true), 600);
+  }
+
+  function handleAkutFill(id) {
+    setVacantSlotId(id);
+    setVacantBlock("akutEct");
     setShowStandby(true);
   }
 
   function handleBook(patient) {
     if (!vacantSlotId) return;
-    setEctSlots(prev => prev.map(s =>
+    const setter = vacantBlock === "ect" ? setEctSlots : setAkutEctSlots;
+    setter(prev => prev.map(s =>
       s.id === vacantSlotId
-        ? { ...s, status: "klar", patient: patient.name, pnr: patient.id, note: `${patient.ward}`, blaaappen: false, halsodekl: true, anestesi: false }
+        ? { ...s, status: "klar", patient: patient.name, pnr: patient.id, note: patient.ward, blaaappen: false, halsodekl: true, anestesi: false }
         : s
     ));
     setShowStandby(false);
@@ -636,6 +696,7 @@ export default function App() {
   }
 
   const ectCount = ectSlots.filter(s => s.status !== "ledig").length;
+  const akutEctCount = akutEctSlots.filter(s => s.status !== "ledig").length;
   const rtmsSlots = initialRtmsSlots;
 
   return (
@@ -692,16 +753,16 @@ export default function App() {
       </div>
 
       {/* TESSA Bar */}
-      <TessaBar slots={ectSlots} tessa={TESSA_STATUS} rast={rastFonster} />
+      <TessaBar slots={ectSlots} akutSlots={akutEctSlots} rtmsSlots={rtmsSlots} tessa={TESSA_STATUS} rast={rastFonster} />
 
       {activeTab === "dashboard" ? (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, padding: 20, maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: 20, maxWidth: 1400, margin: "0 auto" }}>
 
           {/* ECT Column */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div>
-                <h2 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: 20, color: C.text }}>
+                <h2 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: 18, color: C.text }}>
                   ECT – Förmiddagsblock
                 </h2>
                 <div style={{ fontSize: 12, color: C.textSub, marginTop: 2 }}>
@@ -712,7 +773,7 @@ export default function App() {
                 background: ectCount >= 12 ? C.akutBg : C.okBg,
                 color: ectCount >= 12 ? C.akut : C.ok,
                 border: `1px solid ${ectCount >= 12 ? C.akut : C.ok}`,
-                borderRadius: 8, padding: "4px 12px", fontSize: 14, fontWeight: 700,
+                borderRadius: 8, padding: "4px 10px", fontSize: 13, fontWeight: 700,
               }}>
                 {ectCount}/12
               </div>
@@ -720,7 +781,7 @@ export default function App() {
 
             <div>
               {ectSlots.map(slot => (
-                <EctSlot key={slot.id} slot={slot} onCancel={handleCancel} onFill={handleFill} />
+                <EctSlot key={slot.id} slot={slot} onCancel={handleCancel} onFill={handleFill} onOrbit={handleOrbit} />
               ))}
             </div>
 
@@ -732,12 +793,40 @@ export default function App() {
               <div style={{ fontSize: 11, fontWeight: 700, color: C.textSub, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                 Färgkoder
               </div>
-              <LegendRow color={C.ok} label="Grön (#1A9E5F)" desc="Klar – alla förutsättningar uppfyllda" />
-              <LegendRow color={C.warn} label="Gul (#D4860A)" desc="Obs – saknad skattning / extra anestesi" />
-              <LegendRow color={C.akut} label="Röd (#C42B2B)" desc="Akut / Bruten fasta / Kritisk varning" />
-              <LegendRow color={C.slutford} label="Blå (#2563EB)" desc="Slutförd behandling" />
-              <LegendRow color={C.dubbel} label="Lila (#7C3AED)" desc="Dubbelbehandling (accelererad rTMS)" />
+              <LegendRow color={C.ok} label="Grön" desc="Klar – alla förutsättningar uppfyllda" />
+              <LegendRow color={C.warn} label="Gul" desc="Obs – saknad skattning / extra anestesi" />
+              <LegendRow color={C.akut} label="Röd" desc="Akut / Bruten fasta / Kritisk varning" />
+              <LegendRow color={C.slutford} label="Blå" desc="Slutförd behandling" />
+              <LegendRow color={C.dubbel} label="Lila" desc="Dubbelbehandling (accelererad rTMS)" />
               <LegendRow color={C.textSub} label="Grå (streckad)" desc="Personalens rast – ej bokningsbar" />
+            </div>
+          </div>
+
+          {/* Akut ECT Column */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div>
+                <h2 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: 18, color: C.akut }}>
+                  Akut ECT – Eftermiddagsblock
+                </h2>
+                <div style={{ fontSize: 12, color: C.textSub, marginTop: 2 }}>
+                  13:00–15:45 · Kapacitet: {akutEctCount}/12
+                </div>
+              </div>
+              <div style={{
+                background: akutEctCount > 0 ? C.akutBg : C.ledigBg,
+                color: akutEctCount > 0 ? C.akut : C.ledigt,
+                border: `1px solid ${akutEctCount > 0 ? C.akut : C.border}`,
+                borderRadius: 8, padding: "4px 10px", fontSize: 13, fontWeight: 700,
+              }}>
+                {akutEctCount}/12
+              </div>
+            </div>
+
+            <div>
+              {akutEctSlots.map(slot => (
+                <EctSlot key={slot.id} slot={slot} onCancel={handleAkutCancel} onFill={handleAkutFill} onOrbit={handleAkutOrbit} />
+              ))}
             </div>
           </div>
 
@@ -745,19 +834,19 @@ export default function App() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div>
-                <h2 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: 20, color: C.text }}>
+                <h2 style={{ margin: 0, fontFamily: "'DM Serif Display', serif", fontSize: 18, color: C.text }}>
                   rTMS – Eftermiddagsblock
                 </h2>
                 <div style={{ fontSize: 12, color: C.textSub, marginTop: 2 }}>
-                  13:00– · Kapacitet: {rtmsSlots.filter(s => s.status !== "ledig").length}/8
+                  13:00–18:00 · Kapacitet: {rtmsSlots.filter(s => s.status !== "ledig").length}/12
                 </div>
               </div>
               <div style={{
                 background: C.okBg, color: C.ok,
                 border: `1px solid ${C.ok}`,
-                borderRadius: 8, padding: "4px 12px", fontSize: 14, fontWeight: 700,
+                borderRadius: 8, padding: "4px 10px", fontSize: 13, fontWeight: 700,
               }}>
-                {rtmsSlots.filter(s => s.status !== "ledig").length}/8
+                {rtmsSlots.filter(s => s.status !== "ledig").length}/12
               </div>
             </div>
 
