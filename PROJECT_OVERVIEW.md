@@ -235,7 +235,6 @@ VGR kan upphandla FoU och innovation med speciellt undantag för innovativa lös
 - [ ] **Nästa vecka:** Ring Andreas Gremyr på ePsykiatrienheten
 - [ ] **Parallellt:** Kontakta Zuzana Polievka om LIA-möjlighet på ePsykiatrienheten
 - [ ] **Parallellt:** Kontakta innovationsfonden@vgregion.se för förcoachning
-- [ ] **Inför möten:** Polera prototypen — visa med riktiga VGR-dokument (Max Rindbys dokument är redan inlagt)
 - [ ] **Ladda upp repot:** Följ GitHub-guiden och strukturera koden
 
 ---
@@ -262,7 +261,6 @@ Det finns i Sverige ett fåtal personer som har klinisk ssk-bakgrund inom ECT OC
 
 | Fil | Innehåll |
 |-----|---------|
-| `prototype/ect_rtms_dashboard.jsx` | Interaktiv React-prototyp — koordinator-dashboard, remissguide, styrdokumentflik |
 | `docs/VGR_Behovsanalys_ECT_rTMS_v2.docx` | Komplett behovsanalys för VGR IT-beställning |
 | `presentations/ECT_rTMS_Enhetschef_Presentation_v2.pptx` | 8-sidig presentation för enhetschef |
 | `architecture/database_schema.sql` | Fullständig databasmodell |
