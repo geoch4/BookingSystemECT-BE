@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Application.Services;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Infrastructure.IRepository;
@@ -22,39 +23,13 @@ namespace BookingSystem.Application.Service.Implementation
         {
             var booking = await _repository.GetByIdAsync(id);
 
-            return new BookingDto
-            {
-                BookingId = booking.BookingId,
-                Date = booking.Date,
-                PatientId = booking.PatientId,
-                TreatmentType = booking.TreatmentType,
-                CreatedById = booking.CreatedByUserId,
-                CreatedAt = booking.CreatedAt,
-                Priority = booking.Priority,
-                Status = booking.Status,
-                ReferralDepartment = booking.ReferralDepartment,
-                ReferralContactName = booking.ReferralContactName,
-                ReferralContactPhone = booking.ReferralContactPhone
-            };
+            return DtoMapper.ToDto(booking);
         }
 
         public async Task<IEnumerable<BookingDto>> GetAllBookingsAsync()
         {
             var bookings = await _repository.GetAllAsync();
-            return bookings.Select(b => new BookingDto
-            {
-                BookingId = b.BookingId,
-                Date = b.Date,
-                PatientId = b.PatientId,
-                TreatmentType = b.TreatmentType,
-                CreatedById = b.CreatedByUserId,
-                CreatedAt = b.CreatedAt,
-                Priority = b.Priority,
-                Status = b.Status,
-                ReferralDepartment = b.ReferralDepartment,
-                ReferralContactName = b.ReferralContactName,
-                ReferralContactPhone = b.ReferralContactPhone
-            });
+            return bookings.Select(DtoMapper.ToDto);
         }
 
         public async Task<BookingDto> CreateBookingAsync(CreateBookingDto dto)
@@ -70,24 +45,17 @@ namespace BookingSystem.Application.Service.Implementation
                 Status = dto.Status,
                 ReferralDepartment = dto.ReferralDepartment,
                 ReferralContactName = dto.ReferralContactName,
-                ReferralContactPhone = dto.ReferralContactPhone
+                ReferralContactPhone = dto.ReferralContactPhone,
+                CancellationReason = dto.CancellationReason,
+                ExternalPatientId = dto.ExternalPatientId,
+                SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem),
+                CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment,
+                RegionCode = dto.RegionCode,
+                IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus)
             };
 
             await _repository.AddAsync(booking);
-            return new BookingDto
-            {
-                BookingId = booking.BookingId,
-                Date = booking.Date,
-                PatientId = booking.PatientId,
-                TreatmentType = booking.TreatmentType,
-                CreatedById = booking.CreatedByUserId,
-                CreatedAt = booking.CreatedAt,
-                Priority = booking.Priority,
-                Status = booking.Status,
-                ReferralDepartment = booking.ReferralDepartment,
-                ReferralContactName = booking.ReferralContactName,
-                ReferralContactPhone = booking.ReferralContactPhone
-            };
+            return DtoMapper.ToDto(booking);
         }
 
         public async Task<bool> UpdateBookingAsync(int id, CreateBookingDto dto)
@@ -104,6 +72,12 @@ namespace BookingSystem.Application.Service.Implementation
             booking.ReferralDepartment = dto.ReferralDepartment;
             booking.ReferralContactName = dto.ReferralContactName;
             booking.ReferralContactPhone = dto.ReferralContactPhone;
+            booking.CancellationReason = dto.CancellationReason;
+            booking.ExternalPatientId = dto.ExternalPatientId;
+            booking.SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem);
+            booking.CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment;
+            booking.RegionCode = dto.RegionCode;
+            booking.IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus);
 
             await _repository.UpdateAsync(booking);
             return true;

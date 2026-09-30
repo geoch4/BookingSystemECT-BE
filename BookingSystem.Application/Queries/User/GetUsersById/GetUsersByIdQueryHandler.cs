@@ -32,7 +32,9 @@ public class GetUsersByIdQueryHandler : IRequestHandler<GetUsersByIdQuery, Opera
             UserId = user.UserId,
             Fullname = user.Fullname,
             Email = user.Email,
-            RoleName = user.Role.RoleName
+            RoleId = user.RoleId,
+            RoleName = user.Role.RoleName,
+            CareUnitId = user.CareUnitId
         };
 
         return OperationResult<UserDto>.Ok(userDto);

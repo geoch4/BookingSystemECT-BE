@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Application.Service.Interface;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Infrastructure.IRepository;
@@ -22,12 +23,7 @@ namespace BookingSystem.Application.Service.Implementation
         {
             var patients = await _repository.GetAllAsync();
 
-            return patients.Select(p => new PatientDto
-            {
-                PatientId = p.PatientId,
-                FullName = p.FullName,
-                SocialSecurityNumber = p.SocialSecurityNumber
-            });
+            return patients.Select(DtoMapper.ToDto);
         }
 
         public async Task<PatientDto?> GetByIdAsync(int id)
@@ -35,12 +31,7 @@ namespace BookingSystem.Application.Service.Implementation
             var patient = await _repository.GetByIdAsync(id);
             if (patient == null) return null;
 
-            return new PatientDto
-            {
-                PatientId = patient.PatientId,
-                FullName = patient.FullName,
-                SocialSecurityNumber = patient.SocialSecurityNumber
-            };
+            return DtoMapper.ToDto(patient);
         }
 
         public async Task<PatientDto> CreateAsync(CreatePatientDto dto)
@@ -48,17 +39,16 @@ namespace BookingSystem.Application.Service.Implementation
             var patient = new Patient
             {
                 FullName = dto.FullName,
-                SocialSecurityNumber = dto.SocialSecurityNumber
+                SocialSecurityNumber = dto.SocialSecurityNumber,
+                ExternalPatientId = dto.ExternalPatientId,
+                SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem),
+                RegionCode = dto.RegionCode,
+                IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus)
             };
 
             await _repository.AddAsync(patient);
 
-            return new PatientDto
-            {
-                PatientId = patient.PatientId,
-                FullName = patient.FullName,
-                SocialSecurityNumber = patient.SocialSecurityNumber
-            };
+            return DtoMapper.ToDto(patient);
         }
 
         public async Task<bool> UpdateAsync(int id, CreatePatientDto dto)
@@ -68,6 +58,10 @@ namespace BookingSystem.Application.Service.Implementation
 
             patient.FullName = dto.FullName;
             patient.SocialSecurityNumber = dto.SocialSecurityNumber;
+            patient.ExternalPatientId = dto.ExternalPatientId;
+            patient.SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem);
+            patient.RegionCode = dto.RegionCode;
+            patient.IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus);
 
             await _repository.UpdateAsync(patient);
             return true;

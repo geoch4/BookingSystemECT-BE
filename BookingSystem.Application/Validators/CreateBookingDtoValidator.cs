@@ -41,5 +41,32 @@ public class CreateBookingDtoValidator : AbstractValidator<CreateBookingDto>
 
         RuleFor(x => x.ReferralContactPhone)
             .MaximumLength(40).WithMessage("ReferralContactPhone can be at most 40 characters");
+
+        RuleFor(x => x.ReferralDepartment)
+            .NotEmpty().WithMessage("ReferralDepartment is required");
+
+        RuleFor(x => x.CancellationReason)
+            .MaximumLength(500).WithMessage("CancellationReason can be at most 500 characters");
+
+        RuleFor(x => x.ExternalPatientId)
+            .MaximumLength(160).WithMessage("ExternalPatientId can be at most 160 characters");
+
+        RuleFor(x => x.SourceSystem)
+            .MaximumLength(80).WithMessage("SourceSystem can be at most 80 characters");
+
+        RuleFor(x => x.CareUnitId)
+            .MaximumLength(120).WithMessage("CareUnitId can be at most 120 characters");
+
+        RuleFor(x => x.RegionCode)
+            .MaximumLength(20).WithMessage("RegionCode can be at most 20 characters");
+
+        RuleFor(x => x.IntegrationStatus)
+            .MaximumLength(40).WithMessage("IntegrationStatus can be at most 40 characters");
+
+        When(x => x.Status == BookingSystem.Domain.Enums.BookingStatus.Cancelled, () =>
+        {
+            RuleFor(x => x.CancellationReason)
+                .NotEmpty().WithMessage("CancellationReason is required when a booking is cancelled");
+        });
     }
 }

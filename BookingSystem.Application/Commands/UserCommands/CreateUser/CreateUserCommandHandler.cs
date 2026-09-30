@@ -32,7 +32,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Opera
             Fullname = dto.Fullname,
             Email = dto.Email,
             PasswordHash = hashedPassword,
-            RoleId = dto.RoleId
+            RoleId = dto.RoleId,
+            CareUnitId = dto.CareUnitId
         };
 
         _context.Users.Add(user);

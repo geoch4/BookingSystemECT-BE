@@ -19,6 +19,12 @@ namespace BookingSystem.Application.DTO
         public string? ReferralDepartment { get; set; }
         public string? ReferralContactName { get; set; }
         public string? ReferralContactPhone { get; set; }
+        public string? CancellationReason { get; set; }
+        public string? ExternalPatientId { get; set; }
+        public string SourceSystem { get; set; } = "Manual";
+        public string? CareUnitId { get; set; }
+        public string? RegionCode { get; set; }
+        public string IntegrationStatus { get; set; } = "Manual";
     }
 
     public class CreateBookingDto
@@ -35,5 +41,11 @@ namespace BookingSystem.Application.DTO
         public string? ReferralDepartment { get; set; }
         public string? ReferralContactName { get; set; }
         public string? ReferralContactPhone { get; set; }
+        public string? CancellationReason { get; set; }
+        public string? ExternalPatientId { get; set; }
+        public string? SourceSystem { get; set; }
+        public string? CareUnitId { get; set; }
+        public string? RegionCode { get; set; }
+        public string? IntegrationStatus { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Backend purpose: Exposes HTTP endpoints for the UserController backend feature.
 using BookingSystem.Application.Commands.UserCommands.DeleteUser;
 using BookingSystem.Application.Commands.UserCommands.UpdateUser;
+using BookingSystem.Application.Authorization;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.GetAllUsers;
 using BookingSystem.Application.Queries.User.GetUsersById;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
+    [Authorize(Policy = AccessPolicies.OnlyAdmin)]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -52,8 +54,6 @@ namespace API.Controllers
         }
 
         // DELETE: api/user/5
-        [Authorize(Policy = "OnlyAdmin")]
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

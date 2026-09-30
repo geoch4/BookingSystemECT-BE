@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Infrastructure;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,7 @@ public class GetAllPatientsQueryHandler : IRequestHandler<GetAllPatientsQuery, I
 
     public async Task<IEnumerable<PatientDto>> Handle(GetAllPatientsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Patients
-            .Select(p => new PatientDto
-            {
-                PatientId = p.PatientId,
-                FullName = p.FullName,
-                SocialSecurityNumber = p.SocialSecurityNumber
-            })
-            .ToListAsync(cancellationToken);
+        var patients = await _context.Patients.ToListAsync(cancellationToken);
+        return patients.Select(DtoMapper.ToDto).ToList();
     }
 }

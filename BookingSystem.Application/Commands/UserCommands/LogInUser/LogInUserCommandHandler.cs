@@ -30,7 +30,7 @@ public class LogInUserCommandHandler : IRequestHandler<LogInUserCommand, Operati
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             return OperationResult<string>.Fail("Ogiltig inloggning");
 
-        var token = _authService.GenerateJwtToken(user.UserId, user.Fullname, user.Role.RoleName);
+        var token = _authService.GenerateJwtToken(user.UserId, user.Fullname, user.Role.RoleName, user.CareUnitId);
 
         return OperationResult<string>.Ok(token, "Inloggning lyckades");
     }

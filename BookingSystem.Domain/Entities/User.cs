@@ -15,6 +15,9 @@ namespace BookingSystem.Domain.Entities
         public string PasswordHash { get; set; } 
         public bool IsDeleted { get; set; } = false;
 
+        [MaxLength(120)]
+        public string? CareUnitId { get; set; }
+
         // Navigation properties and foreign keys.
         public Role Role  { get; set; }
         public int RoleId { get; set; }

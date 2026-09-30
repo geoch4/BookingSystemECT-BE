@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Infrastructure;
 using MediatR;
@@ -22,17 +23,16 @@ public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand,
         var patient = new Patient
         {
             FullName = request.Dto.FullName,
-            SocialSecurityNumber = request.Dto.SocialSecurityNumber
+            SocialSecurityNumber = request.Dto.SocialSecurityNumber,
+            ExternalPatientId = request.Dto.ExternalPatientId,
+            SourceSystem = DtoMapper.CleanSourceSystem(request.Dto.SourceSystem),
+            RegionCode = request.Dto.RegionCode,
+            IntegrationStatus = DtoMapper.ParseIntegrationStatus(request.Dto.IntegrationStatus)
         };
 
         _context.Patients.Add(patient);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new PatientDto
-        {
-            PatientId = patient.PatientId,
-            FullName = patient.FullName,
-            SocialSecurityNumber = patient.SocialSecurityNumber
-        };
+        return DtoMapper.ToDto(patient);
     }
 }

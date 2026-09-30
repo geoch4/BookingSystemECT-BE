@@ -1,6 +1,7 @@
 ﻿// Backend purpose: Exposes HTTP endpoints for the AuthController backend feature.
 using BookingSystem.Application.Commands.UserCommands.CreateUser;
 using BookingSystem.Application.Commands.UserCommands.LogInUser;
+using BookingSystem.Application.Authorization;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using MediatR;
@@ -31,7 +32,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Policy = "OnlyAdmin")]
+        [Authorize(Policy = AccessPolicies.OnlyAdmin)]
         [HttpPost("register")]
         public async Task<ActionResult<OperationResult<int>>> Register([FromBody] CreateUserDto dto)
         {

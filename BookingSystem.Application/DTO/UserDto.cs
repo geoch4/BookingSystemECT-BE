@@ -7,7 +7,9 @@ namespace BookingSystem.Application.DTO
         public int UserId { get; set; } 
         public string Email { get; set; } = string.Empty;
         public string Fullname { get; set; } = string.Empty;
+        public int RoleId { get; set; }
         public string? RoleName { get; set; } = string.Empty;
+        public string? CareUnitId { get; set; }
     }
 
     public class CreateUserDto
@@ -16,6 +18,7 @@ namespace BookingSystem.Application.DTO
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public int RoleId { get; set; }
+        public string? CareUnitId { get; set; }
     }
 
     public class UpdateUserDto
@@ -23,5 +26,7 @@ namespace BookingSystem.Application.DTO
         public string? Fullname { get; set; } 
         public string? Email { get; set; } 
         public string? Password { get; set; } 
+        public int? RoleId { get; set; }
+        public string? CareUnitId { get; set; }
     }
 }

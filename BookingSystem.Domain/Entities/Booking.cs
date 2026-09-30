@@ -42,5 +42,22 @@ namespace BookingSystem.Domain.Entities
 
         [MaxLength(40)]
         public string? ReferralContactPhone { get; set; }
+
+        [MaxLength(500)]
+        public string? CancellationReason { get; set; }
+
+        [MaxLength(160)]
+        public string? ExternalPatientId { get; set; }
+
+        [MaxLength(80)]
+        public string SourceSystem { get; set; } = "Manual";
+
+        [MaxLength(120)]
+        public string? CareUnitId { get; set; }
+
+        [MaxLength(20)]
+        public string? RegionCode { get; set; }
+
+        public IntegrationStatus IntegrationStatus { get; set; } = IntegrationStatus.Manual;
     }
 }

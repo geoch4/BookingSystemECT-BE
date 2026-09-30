@@ -30,6 +30,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, bool>
         if (!string.IsNullOrWhiteSpace(request.Dto.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Dto.Password);
 
+        if (request.Dto.RoleId is > 0)
+            user.RoleId = request.Dto.RoleId.Value;
+
+        if (request.Dto.CareUnitId is not null)
+            user.CareUnitId = string.IsNullOrWhiteSpace(request.Dto.CareUnitId) ? null : request.Dto.CareUnitId;
+
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }

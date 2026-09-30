@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 using BookingSystem.Infrastructure;
@@ -51,7 +52,13 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             AnesthesiaAssessmentStatus = dto.AnesthesiaAssessmentStatus,
             ReferralDepartment = dto.ReferralDepartment,
             ReferralContactName = dto.ReferralContactName,
-            ReferralContactPhone = dto.ReferralContactPhone
+            ReferralContactPhone = dto.ReferralContactPhone,
+            CancellationReason = dto.Status == BookingStatus.Cancelled ? dto.CancellationReason : null,
+            ExternalPatientId = dto.ExternalPatientId,
+            SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem),
+            CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment,
+            RegionCode = dto.RegionCode,
+            IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus)
         };
 
         _context.Bookings.Add(booking);
@@ -66,22 +73,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         }
 
         // Return the persisted values, including the database-generated booking identifier.
-        var result = new BookingDto
-        {
-            BookingId = booking.BookingId,
-            Date = booking.Date,
-            PatientId = booking.PatientId,
-            TreatmentType = booking.TreatmentType,
-            CreatedById = booking.CreatedByUserId,
-            CreatedAt = booking.CreatedAt,
-            Priority = booking.Priority,
-            Status = booking.Status,
-            HealthDeclarationStatus = booking.HealthDeclarationStatus,
-            AnesthesiaAssessmentStatus = booking.AnesthesiaAssessmentStatus,
-            ReferralDepartment = booking.ReferralDepartment,
-            ReferralContactName = booking.ReferralContactName,
-            ReferralContactPhone = booking.ReferralContactPhone
-        };
+        var result = DtoMapper.ToDto(booking);
         return OperationResult<BookingDto>.Ok(result);
     }
 

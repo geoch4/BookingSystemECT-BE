@@ -28,7 +28,9 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumer
                 UserId = u.UserId,
                 Fullname = u.Fullname,
                 Email = u.Email,
-                RoleName = u.Role.RoleName
+                RoleId = u.RoleId,
+                RoleName = u.Role.RoleName,
+                CareUnitId = u.CareUnitId
             })
             .ToListAsync(cancellationToken);
     }

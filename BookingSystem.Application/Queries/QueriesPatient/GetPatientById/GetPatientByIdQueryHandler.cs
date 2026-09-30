@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Infrastructure;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,6 @@ public class GetPatientByIdQueryHandler : IRequestHandler<GetPatientByIdQuery, P
 
         if (patient == null) return null;
 
-        return new PatientDto
-        {
-            PatientId = patient.PatientId,
-            FullName = patient.FullName,
-            SocialSecurityNumber = patient.SocialSecurityNumber
-        };
+        return DtoMapper.ToDto(patient);
     }
 }

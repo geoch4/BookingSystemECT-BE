@@ -5,9 +5,11 @@ using System.Text;
 using Bogus.DataSets;
 using BookingSystem.Application.Authorization;
 using BookingSystem.Application.Behaviors;
+using BookingSystem.Application.Integrations;
 using BookingSystem.Application.Queries.GetAllUsers;
 using BookingSystem.Application.Service.Implementation;
 using BookingSystem.Application.Validators;
+using BookingSystem.Domain;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Infrastructure;
 using BookingSystem.Infrastructure.DataBase;
@@ -62,11 +64,23 @@ namespace API
            
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IAuditContext, HttpAuditContext>();
+            builder.Services.AddScoped<AuditLogWriter>();
+            builder.Services.Configure<IntegrationReadinessOptions>(
+                builder.Configuration.GetSection("Integrations"));
+            builder.Services.AddScoped<IExternalIntegrationGateway, DisabledExternalIntegrationGateway>();
             
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("OnlyAdmin", policy =>
-                    policy.Requirements.Add(new RoleRequirement("Admin")));
+                options.AddPolicy(AccessPolicies.OnlyAdmin, policy =>
+                    policy.Requirements.Add(new RoleRequirement(AccessRoles.Admin)));
+
+                options.AddPolicy(AccessPolicies.TreatmentUnit, policy =>
+                    policy.Requirements.Add(new RoleRequirement(AccessRoles.TreatmentUnit)));
+
+                options.AddPolicy(AccessPolicies.CareStaff, policy =>
+                    policy.Requirements.Add(new RoleRequirement(AccessRoles.AuthenticatedCareUsers)));
             });
             builder.Services.AddSingleton<IAuthorizationHandler, RoleRequirementHandler>();
 

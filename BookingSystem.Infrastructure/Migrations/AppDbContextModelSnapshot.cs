@@ -17,10 +17,79 @@ namespace BookingSystem.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.27")
+                .HasAnnotation("ProductVersion", "8.0.28")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.AuditLog", b =>
+                {
+                    b.Property<long>("AuditLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AuditLogId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("CareUnitId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("ChangedFields")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("EntityName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("RequestMethod")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("RequestPath")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("AuditLogId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EntityName", "EntityId", "CreatedAt");
+
+                    b.ToTable("AuditLogs");
+                });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Booking", b =>
                 {
@@ -33,6 +102,14 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<int>("AnesthesiaAssessmentStatus")
                         .HasColumnType("int");
 
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CareUnitId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -43,7 +120,14 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ExternalPatientId")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
                     b.Property<int>("HealthDeclarationStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IntegrationStatus")
                         .HasColumnType("int");
 
                     b.Property<int>("PatientId")
@@ -63,6 +147,15 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<string>("ReferralDepartment")
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("RegionCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -116,12 +209,12 @@ namespace BookingSystem.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
 
                     b.Property<int>("RecipientId")
                         .HasColumnType("int");
@@ -136,55 +229,6 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("BookingSystem.Domain.Entities.StaffingStatus", b =>
-                {
-                    b.Property<int>("StaffingStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffingStatusId"));
-
-                    b.Property<int>("AnesthesiaAvailable").HasColumnType("int");
-                    b.Property<int>("AnesthesiaRequired").HasColumnType("int");
-                    b.Property<TimeSpan?>("BreakEnd").HasColumnType("time");
-                    b.Property<TimeSpan?>("BreakStart").HasColumnType("time");
-                    b.Property<DateTime>("Date").HasColumnType("datetime2");
-                    b.Property<int>("DoctorsAvailable").HasColumnType("int");
-                    b.Property<int>("DoctorsRequired").HasColumnType("int");
-                    b.Property<int>("NursesAvailable").HasColumnType("int");
-                    b.Property<int>("NursesRequired").HasColumnType("int");
-                    b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
-
-                    b.HasKey("StaffingStatusId");
-
-                    b.HasIndex("Date").IsUnique();
-
-                    b.ToTable("StaffingStatuses");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.StandbyEntry", b =>
-                {
-                    b.Property<int>("StandbyEntryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StandbyEntryId"));
-
-                    b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
-                    b.Property<string>("Department").IsRequired().HasMaxLength(120).HasColumnType("nvarchar(120)");
-                    b.Property<bool>("IsActive").HasColumnType("bit");
-                    b.Property<int>("PatientId").HasColumnType("int");
-                    b.Property<int>("Urgency").HasColumnType("int");
-
-                    b.HasKey("StandbyEntryId");
-
-                    b.HasIndex("PatientId", "IsActive")
-                        .IsUnique()
-                        .HasFilter("[IsActive] = 1");
-
-                    b.ToTable("StandbyEntries");
-                });
-
             modelBuilder.Entity("BookingSystem.Domain.Entities.Patient", b =>
                 {
                     b.Property<int>("PatientId")
@@ -193,13 +237,29 @@ namespace BookingSystem.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientId"));
 
+                    b.Property<string>("ExternalPatientId")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("IntegrationStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RegionCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("SocialSecurityNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.HasKey("PatientId");
 
@@ -207,6 +267,49 @@ namespace BookingSystem.Infrastructure.Migrations
                         {
                             t.ExcludeFromMigrations();
                         });
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.ReferralAction", b =>
+                {
+                    b.Property<int>("ReferralActionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReferralActionId"));
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("ConfirmedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReferralId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("ReferralActionId");
+
+                    b.HasIndex("ReferralId");
+
+                    b.ToTable("ReferralActions");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Role", b =>
@@ -225,6 +328,86 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("BookingSystem.Domain.Entities.StaffingStatus", b =>
+                {
+                    b.Property<int>("StaffingStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffingStatusId"));
+
+                    b.Property<int>("AnesthesiaAvailable")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AnesthesiaRequired")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan?>("BreakEnd")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan?>("BreakStart")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DoctorsAvailable")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DoctorsRequired")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NursesAvailable")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NursesRequired")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("StaffingStatusId");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
+
+                    b.ToTable("StaffingStatuses");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.StandbyEntry", b =>
+                {
+                    b.Property<int>("StandbyEntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StandbyEntryId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Urgency")
+                        .HasColumnType("int");
+
+                    b.HasKey("StandbyEntryId");
+
+                    b.HasIndex("PatientId", "IsActive")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
+
+                    b.ToTable("StandbyEntries");
+                });
+
             modelBuilder.Entity("BookingSystem.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -232,6 +415,10 @@ namespace BookingSystem.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("CareUnitId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("Email")
                         .IsRequired()

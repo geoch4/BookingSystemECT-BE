@@ -2,10 +2,12 @@
 using BookingSystem.Application.Commands.DocumentCommand.CreateDocument;
 using BookingSystem.Application.Commands.DocumentCommand.DeleteDocument;
 using BookingSystem.Application.Commands.DocumentCommand.UpdateDocument;
+using BookingSystem.Application.Authorization;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.QueriesDocument.GetAllDocuments;
 using BookingSystem.Application.Queries.QueriesDocument.GetDocumentById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -13,14 +15,17 @@ namespace API.Controllers;
 
 
 [ApiController]
+[Authorize(Policy = AccessPolicies.TreatmentUnit)]
 [Route("api/[controller]")]
 public class DocumentController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly AuditLogWriter _auditLogWriter;
 
-    public DocumentController(IMediator mediator)
+    public DocumentController(IMediator mediator, AuditLogWriter auditLogWriter)
     {
         _mediator = mediator;
+        _auditLogWriter = auditLogWriter;
     }
 
     // POST: api/document
@@ -36,22 +41,24 @@ public class DocumentController : ControllerBase
 
     // GET: api/document/{id}
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetDocumentById(int id)
+    public async Task<IActionResult> GetDocumentById(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetDocumentByIdQuery(id));
         if (!result.Success)
             return NotFound(result.ErrorMessage);;
+        await _auditLogWriter.RecordReadAsync("Document", id.ToString(), cancellationToken);
         return Ok(result.Data);
     }
 
     // GET: api/document
     [HttpGet]
-    public async Task<IActionResult> GetAllDocuments()
+    public async Task<IActionResult> GetAllDocuments(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetAllDocumentsQuery());
         if (!result.Success)
             return BadRequest(result.ErrorMessage);
 
+        await _auditLogWriter.RecordReadAsync("Document", "list", cancellationToken);
         return Ok(result.Data);
     }
 

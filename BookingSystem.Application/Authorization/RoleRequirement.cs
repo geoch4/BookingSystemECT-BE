@@ -1,6 +1,5 @@
 ﻿// Backend purpose: Defines authorization behavior for RoleRequirement.
-using System.Security.Claims;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 
 
@@ -8,10 +7,10 @@ namespace BookingSystem.Application.Authorization;
 
 public class RoleRequirement : IAuthorizationRequirement
 {
-    public string RequiredRole { get; }
+    public IReadOnlyCollection<string> RequiredRoles { get; }
 
-    public RoleRequirement(string requiredRole)
+    public RoleRequirement(params string[] requiredRoles)
     {
-        RequiredRole = requiredRole;
+        RequiredRoles = requiredRoles;
     }
 }

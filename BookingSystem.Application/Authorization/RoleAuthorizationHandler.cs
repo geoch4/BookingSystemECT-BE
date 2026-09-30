@@ -1,5 +1,6 @@
 ﻿// Backend purpose: Defines authorization behavior for RoleAuthorizationHandler.
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -13,17 +14,12 @@ public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
     {
         var roleClaim = context.User.FindFirst(ClaimTypes.Role);
 
-        if (roleClaim != null && roleClaim.Value == requirement.RequiredRole)
+        if (roleClaim != null && requirement.RequiredRoles.Any(role =>
+                string.Equals(roleClaim.Value, role, StringComparison.OrdinalIgnoreCase)))
         {
             context.Succeed(requirement);
         }
-        
-        foreach (var claim in context.User.Claims)
-        {
-            Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-        }
+
         return Task.CompletedTask;
     }
-
-   
 }

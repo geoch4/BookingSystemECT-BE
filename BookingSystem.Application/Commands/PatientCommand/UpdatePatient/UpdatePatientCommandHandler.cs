@@ -1,6 +1,7 @@
 ﻿// Backend purpose: Defines the write-side application flow for UpdatePatientCommandHandler.
 using System.Threading;
 using System.Threading.Tasks;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Infrastructure;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,10 @@ public class UpdatePatientCommandHandler : IRequestHandler<UpdatePatientCommand,
 
         patient.FullName = request.Dto.FullName;
         patient.SocialSecurityNumber = request.Dto.SocialSecurityNumber;
+        patient.ExternalPatientId = request.Dto.ExternalPatientId;
+        patient.SourceSystem = DtoMapper.CleanSourceSystem(request.Dto.SourceSystem);
+        patient.RegionCode = request.Dto.RegionCode;
+        patient.IntegrationStatus = DtoMapper.ParseIntegrationStatus(request.Dto.IntegrationStatus);
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;

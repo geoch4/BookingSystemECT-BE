@@ -2,10 +2,12 @@
 using BookingSystem.Application.Commands.RoleCommand.CreateRole;
 using BookingSystem.Application.Commands.RoleCommand.DeleteRole;
 using BookingSystem.Application.Commands.RoleCommand.UpdateRole;
+using BookingSystem.Application.Authorization;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.QueriesRole.GetRolesById;
 using BookingSystem.Application.Roles.Queries.GetAllRoles;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -14,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize(Policy = AccessPolicies.OnlyAdmin)]
     [Route("api/[controller]")]
     public class RoleController : ControllerBase
     {
@@ -44,7 +47,6 @@ namespace API.Controllers
 
 
         // GET: api/role
-        [HttpGet]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoleDto>>> GetAllRoles()
         {

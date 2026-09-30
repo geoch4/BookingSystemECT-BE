@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 using BookingSystem.Application.Common;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Domain.Enums;
 using BookingSystem.Infrastructure;
 using MediatR;
@@ -55,6 +56,12 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
         booking.ReferralDepartment = dto.ReferralDepartment;
         booking.ReferralContactName = dto.ReferralContactName;
         booking.ReferralContactPhone = dto.ReferralContactPhone;
+        booking.CancellationReason = dto.Status == BookingStatus.Cancelled ? dto.CancellationReason : null;
+        booking.ExternalPatientId = dto.ExternalPatientId;
+        booking.SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem);
+        booking.CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment;
+        booking.RegionCode = dto.RegionCode;
+        booking.IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus);
 
         try
         {

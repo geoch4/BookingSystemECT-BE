@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Infrastructure;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,23 +25,7 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, O
     {
         var bookings = await _context.Bookings.ToListAsync(cancellationToken);
         
-        var bookingsDto = bookings.Select(b => new BookingDto
-            {
-                BookingId = b.BookingId,
-                Date = b.Date,
-                PatientId = b.PatientId,
-                TreatmentType = b.TreatmentType,
-                CreatedById = b.CreatedByUserId,
-                CreatedAt = b.CreatedAt,
-                Priority = b.Priority,
-                Status = b.Status,
-                HealthDeclarationStatus = b.HealthDeclarationStatus,
-                AnesthesiaAssessmentStatus = b.AnesthesiaAssessmentStatus,
-                ReferralDepartment = b.ReferralDepartment,
-                ReferralContactName = b.ReferralContactName,
-                ReferralContactPhone = b.ReferralContactPhone
-            })
-            .ToList();
+        var bookingsDto = bookings.Select(DtoMapper.ToDto).ToList();
         
         return OperationResult<List<BookingDto>>.Ok(bookingsDto);
     }
