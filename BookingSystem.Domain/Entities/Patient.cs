@@ -8,8 +8,8 @@ namespace BookingSystem.Domain.Entities
     {
         [Key]
         public int PatientId { get; set; }
-        public string FullName { get; set; } 
-        public string SocialSecurityNumber { get; set; } 
+        public string FullName { get; set; } = string.Empty;
+        public string SocialSecurityNumber { get; set; } = string.Empty;
 
         [MaxLength(160)]
         public string? ExternalPatientId { get; set; }
@@ -22,6 +22,6 @@ namespace BookingSystem.Domain.Entities
 
         public IntegrationStatus IntegrationStatus { get; set; } = IntegrationStatus.Manual;
 
-        public ICollection<Booking> Bookings { get; set; } 
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

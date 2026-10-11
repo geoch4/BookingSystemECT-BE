@@ -67,6 +67,13 @@ namespace BookingSystem.Application.Service.Implementation
             if (user == null) return false;
             
             // Prevent another user from taking an email address that is already in use.
+            if (string.IsNullOrWhiteSpace(dto.Email) ||
+                string.IsNullOrWhiteSpace(dto.Fullname) ||
+                string.IsNullOrWhiteSpace(dto.Password))
+            {
+                return false;
+            }
+
             var existingUser = await _repository.GetByEmailAsync(dto.Email);
             if (existingUser != null && existingUser.UserId != userId)
             {

@@ -7,7 +7,7 @@ namespace BookingSystem.Application.Services
 {
     public interface IBookingService
     {
-        Task<BookingDto> GetBookingByIdAsync(int bookingId);
+        Task<BookingDto?> GetBookingByIdAsync(int bookingId);
         Task<IEnumerable<BookingDto>> GetAllBookingsAsync();
         Task<BookingDto> CreateBookingAsync(CreateBookingDto dto);
         Task<bool> UpdateBookingAsync(int bookingId, CreateBookingDto dto);

@@ -7,7 +7,7 @@ namespace BookingSystem.Infrastructure.IRepository
 {
     public interface IBookingRepository
     {
-        Task<Booking> GetByIdAsync(int bookingId);
+        Task<Booking?> GetByIdAsync(int bookingId);
         Task<IEnumerable<Booking>> GetAllAsync();
         Task AddAsync(Booking booking);
         Task UpdateAsync(Booking booking);

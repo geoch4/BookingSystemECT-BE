@@ -22,6 +22,7 @@ namespace BookingSystem.Infrastructure
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Role> Roles => Set<Role>();
+        public DbSet<PatientCareUnit> PatientCareUnits => Set<PatientCareUnit>();
         public DbSet<Patient> Patients => Set<Patient>();
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<Document> Documents => Set<Document>();
@@ -37,6 +38,9 @@ namespace BookingSystem.Infrastructure
             // The Patients table is managed outside the current migration chain, so migrations must not recreate it.
             modelBuilder.Entity<Patient>().ToTable("Patients", t => t.ExcludeFromMigrations());
 
+            modelBuilder.Entity<PatientCareUnit>().HasKey(m => new {m.PatientId, m.UnitId, m.Kind});
+            modelBuilder.Entity<PatientCareUnit>().HasOne(m => m.Patient).WithMany().HasForeignKey(m => m.PatientId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PatientCareUnit>().HasIndex(m => new {m.UnitId, m.Kind, m.IsActive});
             // Hide soft-deleted users from normal queries without requiring filters in every handler.
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
 
@@ -45,6 +49,25 @@ namespace BookingSystem.Infrastructure
                 .HasIndex(b => b.Date)
                 .IsUnique()
                 .HasFilter($"[{nameof(Booking.Status)}] <> {(int)BookingStatus.Cancelled}");
+
+            // Historical records should remain visible even if the associated user is later soft-deleted.
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.CreatedBy)
+                .WithMany()
+                .HasForeignKey(b => b.CreatedByUserId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Document>()
+                .HasOne(d => d.UploadedBy)
+                .WithMany()
+                .HasForeignKey(d => d.UploadedByUserId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Recipient)
+                .WithMany()
+                .HasForeignKey(n => n.RecipientId)
+                .IsRequired(false);
 
             // A date can have only one staffing summary, updated through the staffing endpoint.
             modelBuilder.Entity<StaffingStatus>()
@@ -73,6 +96,7 @@ namespace BookingSystem.Infrastructure
         {
             if (_isSavingAudit) return base.SaveChanges();
 
+            RotateChangedSessions();
             var pendingAudits = BuildAuditLogs();
             var result = base.SaveChanges();
             SaveAuditLogs(pendingAudits);
@@ -83,10 +107,22 @@ namespace BookingSystem.Infrastructure
         {
             if (_isSavingAudit) return await base.SaveChangesAsync(cancellationToken);
 
+            RotateChangedSessions();
             var pendingAudits = BuildAuditLogs();
             var result = await base.SaveChangesAsync(cancellationToken);
             await SaveAuditLogsAsync(pendingAudits, cancellationToken);
             return result;
+        }
+
+        private void RotateChangedSessions()
+        {
+            ChangeTracker.DetectChanges();
+            var changedRoles=ChangeTracker.Entries<Role>().Where(e=>e.State==EntityState.Modified && e.Property(nameof(Role.RoleName)).IsModified).Select(e=>e.Entity.RoleId).ToArray();
+            if (changedRoles.Length>0)
+                foreach (var user in Users.Where(u=>changedRoles.Contains(u.RoleId)).ToList()) user.SessionVersion=Guid.NewGuid().ToString("N");
+            foreach (var entry in ChangeTracker.Entries<User>().Where(e=>e.State==EntityState.Modified))
+                if (new[] {nameof(User.RoleId),nameof(User.CareUnitId),nameof(User.PasswordHash),nameof(User.Email),nameof(User.IsDeleted)}.Any(name=>entry.Property(name).IsModified))
+                    entry.Entity.SessionVersion=Guid.NewGuid().ToString("N");
         }
 
         private List<PendingAuditLog> BuildAuditLogs()

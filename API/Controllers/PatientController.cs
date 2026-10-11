@@ -20,7 +20,7 @@ namespace API.Controllers;
 // TODO: Align the corresponding MediatR handlers with OperationResult.
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = AccessPolicies.CareStaff)]
 [Route("api/[controller]")]
 public class PatientsController : ControllerBase
 {
@@ -60,6 +60,8 @@ public class PatientsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePatientDto dto)
     {
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        if (!AccessRoles.IsAdmin(role) && !(AccessRoles.IsDepartmentUser(role) && !string.IsNullOrWhiteSpace(GetCareUnitId()))) return Forbid();
         var created = await _mediator.Send(new CreatePatientCommand(dto));
         return CreatedAtAction(nameof(GetById), new { id = created.PatientId }, created);
     }
@@ -84,15 +86,58 @@ public class PatientsController : ControllerBase
         return Ok(new { message = "Patient successfully deleted" });
     }
 
+    [HttpGet("{id}/care-units")]
+    public async Task<IActionResult> GetCareUnits(int id)
+    {
+        if (!CanManageAllPatients()) return Forbid();
+        return Ok(await _context.PatientCareUnits.Where(m=>m.PatientId==id).Select(m=>new {m.UnitId,m.Kind,m.IsActive,m.UpdatedAt,m.Reason}).ToListAsync());
+    }
+    public record PatientMembershipDto(string UnitId, string Kind, bool IsActive, string Reason);
+    [HttpPut("{id}/care-units")]
+    public async Task<IActionResult> UpdateCareUnit(int id, [FromBody] PatientMembershipDto dto)
+    {
+        if (!CanManageAllPatients()) return Forbid();
+        if (string.IsNullOrWhiteSpace(dto.UnitId) || dto.UnitId.Length>120 || dto.Kind is not ("department" or "treatment") || string.IsNullOrWhiteSpace(dto.Reason) || dto.Reason.Length>500) return BadRequest();
+        if (!await _context.Patients.AnyAsync(p=>p.PatientId==id)) return NotFound();
+        if (dto.IsActive)
+        {
+            var users = await _context.Users.Include(u=>u.Role).ToListAsync();
+            if (!users.Any(u=>u.CareUnitId==dto.UnitId && (dto.Kind=="department" ? AccessRoles.IsDepartmentUser(u.Role?.RoleName) : !AccessRoles.IsAdmin(u.Role?.RoleName) && AccessRoles.IsReferralDecisionUser(u.Role?.RoleName)))) return BadRequest(new {message="Okänd enhet för vald enhetstyp."});
+            await PatientUnitMemberships.Grant(_context,id,dto.UnitId,dto.Kind,dto.Reason);
+        }
+        else
+        {
+            var membership = await _context.PatientCareUnits.FindAsync(id,dto.UnitId,dto.Kind);
+            if (membership is null) return NotFound();
+            membership.IsActive=false; membership.UpdatedAt=DateTime.UtcNow; membership.Reason=dto.Reason;
+        }
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    public record TransferPatientDto(string DepartmentId, string Reason);
+    [HttpPost("{id}/transfer")]
+    public async Task<IActionResult> Transfer(int id, [FromBody] TransferPatientDto dto)
+    {
+        if (!CanManageAllPatients()) return Forbid();
+        if (string.IsNullOrWhiteSpace(dto.DepartmentId) || dto.DepartmentId.Length>120 || string.IsNullOrWhiteSpace(dto.Reason) || dto.Reason.Length>500) return BadRequest();
+        if (!await _context.Patients.AnyAsync(p=>p.PatientId==id)) return NotFound();
+        var users = await _context.Users.Include(u=>u.Role).ToListAsync();
+        if (!users.Any(u=>u.CareUnitId==dto.DepartmentId && AccessRoles.IsDepartmentUser(u.Role?.RoleName))) return BadRequest(new {message="Okänd avdelning."});
+        var old = await _context.PatientCareUnits.Where(m=>m.PatientId==id && m.Kind=="department" && m.IsActive).ToListAsync();
+        foreach (var membership in old) { membership.IsActive=false; membership.UpdatedAt=DateTime.UtcNow; membership.Reason=dto.Reason; }
+        await PatientUnitMemberships.Grant(_context,id,dto.DepartmentId,"department",dto.Reason);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     private async Task<IEnumerable<PatientDto>> GetPatientsForCurrentCareUnit(CancellationToken cancellationToken)
     {
+        if (!AccessRoles.IsAny(User.FindFirstValue(ClaimTypes.Role), AccessRoles.AuthenticatedCareUsers)) return [];
         var careUnitId = GetCareUnitId();
         if (string.IsNullOrWhiteSpace(careUnitId)) return [];
 
-        var patients = await _context.Patients
-            .Where(patient => _context.Bookings.Any(booking =>
-                booking.PatientId == patient.PatientId &&
-                (booking.CareUnitId ?? booking.ReferralDepartment) == careUnitId))
+        var patients = await CareUnitPatientAccess.Query(_context, careUnitId, User.FindFirstValue(ClaimTypes.Role))
             .ToListAsync(cancellationToken);
 
         return patients.Select(DtoMapper.ToDto).ToList();
@@ -104,15 +149,13 @@ public class PatientsController : ControllerBase
 
         var careUnitId = GetCareUnitId();
         return !string.IsNullOrWhiteSpace(careUnitId) &&
-               await _context.Bookings.AnyAsync(booking =>
-                   booking.PatientId == patientId &&
-                   (booking.CareUnitId ?? booking.ReferralDepartment) == careUnitId,
+               await CareUnitPatientAccess.Query(_context, careUnitId, User.FindFirstValue(ClaimTypes.Role)).AnyAsync(patient => patient.PatientId == patientId,
                    cancellationToken);
     }
 
     private bool CanManageAllPatients()
     {
-        return AccessRoles.IsTreatmentUnit(User.FindFirstValue(ClaimTypes.Role));
+        return AccessRoles.IsAdmin(User.FindFirstValue(ClaimTypes.Role));
     }
 
     private string? GetCareUnitId()

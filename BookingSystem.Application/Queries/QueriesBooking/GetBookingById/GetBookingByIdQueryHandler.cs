@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookingSystem.Application.Queries.QueriesBooking.GetBookingById;
 
-public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, OperationResult<BookingDto>?>
+public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, OperationResult<BookingDto>>
 {
     private readonly AppDbContext _context;
 
@@ -19,7 +19,7 @@ public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, O
         _context = context;
     }
 
-    public async Task<OperationResult<BookingDto>?> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
+    public async Task<OperationResult<BookingDto>> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
     {
         var b = await _context.Bookings
             .FirstOrDefaultAsync(b => b.BookingId == request.Id, cancellationToken);

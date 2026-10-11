@@ -51,6 +51,7 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
         booking.CreatedAt = dto.CreatedAt;
         booking.Priority = dto.Priority;
         booking.Status = dto.Status;
+        booking.DepartmentPriority = dto.DepartmentPriority;
         booking.HealthDeclarationStatus = dto.HealthDeclarationStatus;
         booking.AnesthesiaAssessmentStatus = dto.AnesthesiaAssessmentStatus;
         booking.ReferralDepartment = dto.ReferralDepartment;
@@ -60,6 +61,7 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
         booking.ExternalPatientId = dto.ExternalPatientId;
         booking.SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem);
         booking.CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment;
+        booking.DepartmentId = dto.DepartmentId ?? booking.DepartmentId ?? booking.CareUnitId;
         booking.RegionCode = dto.RegionCode;
         booking.IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus);
 

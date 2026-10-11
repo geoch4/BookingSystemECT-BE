@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace API.Controllers;
 
-[Authorize]
+[Authorize(Policy = AccessPolicies.CareStaff)]
 [ApiController]
 [Route("api/referrals")]
 public class ReferralsController : ControllerBase
@@ -31,7 +31,7 @@ public class ReferralsController : ControllerBase
     {
         if (!CanManageReferralQueue()) return Forbid();
 
-        var referrals = await _context.Bookings
+        var referrals = await ScopedBookings()
             .OrderBy(b => b.Date)
             .Select(b => new ReferralDto
             {
@@ -43,6 +43,7 @@ public class ReferralsController : ControllerBase
                 ContactName = b.ReferralContactName,
                 ContactPhone = b.ReferralContactPhone,
                 Priority = b.Priority,
+                DepartmentPriority = b.DepartmentPriority,
                 Status = b.Status == BookingStatus.Confirmed
                     ? ReferralStatus.Scheduled
                     : b.Status == BookingStatus.Cancelled
@@ -53,6 +54,8 @@ public class ReferralsController : ControllerBase
                 ExternalPatientId = b.ExternalPatientId,
                 SourceSystem = b.SourceSystem,
                 CareUnitId = b.CareUnitId,
+                DepartmentId = b.DepartmentId,
+                TreatmentUnitId = b.TreatmentUnitId,
                 RegionCode = b.RegionCode,
                 IntegrationStatus = b.IntegrationStatus.ToString()
             })
@@ -66,12 +69,13 @@ public class ReferralsController : ControllerBase
     public async Task<ActionResult<IEnumerable<ReferralDto>>> GetMyReferrals(CancellationToken cancellationToken)
     {
         var careUnitId = GetCareUnitId();
-        var query = _context.Bookings.AsQueryable();
+        if (!AccessRoles.IsDepartmentUser(GetRole()) && !AccessRoles.IsAdmin(GetRole())) return Forbid();
+        var query = ScopedBookings();
 
         if (!CanManageReferralQueue())
         {
             if (string.IsNullOrWhiteSpace(careUnitId)) return Forbid();
-            query = query.Where(b => (b.CareUnitId ?? b.ReferralDepartment) == careUnitId);
+            query = query.Where(b => (b.DepartmentId ?? b.CareUnitId ?? b.ReferralDepartment) == careUnitId);
         }
 
         var referrals = await query
@@ -86,6 +90,7 @@ public class ReferralsController : ControllerBase
                 ContactName = b.ReferralContactName,
                 ContactPhone = b.ReferralContactPhone,
                 Priority = b.Priority,
+                DepartmentPriority = b.DepartmentPriority,
                 Status = b.Status == BookingStatus.Confirmed
                     ? ReferralStatus.Scheduled
                     : b.Status == BookingStatus.Cancelled
@@ -96,6 +101,8 @@ public class ReferralsController : ControllerBase
                 ExternalPatientId = b.ExternalPatientId,
                 SourceSystem = b.SourceSystem,
                 CareUnitId = b.CareUnitId,
+                DepartmentId = b.DepartmentId,
+                TreatmentUnitId = b.TreatmentUnitId,
                 RegionCode = b.RegionCode,
                 IntegrationStatus = b.IntegrationStatus.ToString()
             })
@@ -188,7 +195,7 @@ public class ReferralsController : ControllerBase
         [FromBody] CreateReferralActionDto dto,
         CancellationToken cancellationToken)
     {
-        if (!CanManageReferralQueue()) return Forbid();
+        if (!AccessRoles.IsAdmin(GetRole()) && !AccessRoles.IsMedicalResponsible(GetRole())) return Forbid();
 
         var id = ParseReferralId(referralId);
         if (id is null) return BadRequest(new { message = "Ogiltigt remiss-id." });
@@ -196,6 +203,7 @@ public class ReferralsController : ControllerBase
         var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
         if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
 
+        if (!CanViewReferral(booking)) return Forbid();
         if (dto.Priority is not null) booking.Priority = dto.Priority.Value;
 
         return await CreateAction(id.Value, dto, ReferralActionType.Prioritized, "Prioritet bedömd", cancellationToken);
@@ -214,8 +222,10 @@ public class ReferralsController : ControllerBase
 
         var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
         if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
+        if (!CanViewReferral(booking)) return Forbid();
         if (dto.ConfirmedDateTime is null) return BadRequest(new { message = "Bekräftad tid saknas." });
 
+        if (dto.Priority is not null && dto.Priority.Value != booking.Priority && !AccessRoles.IsAdmin(GetRole()) && !AccessRoles.IsMedicalResponsible(GetRole())) return Forbid();
         var confirmedDate = NormalizeToMinute(dto.ConfirmedDateTime.Value);
         if (await _context.Bookings.AnyAsync(
                 b => b.BookingId != booking.BookingId &&
@@ -226,6 +236,7 @@ public class ReferralsController : ControllerBase
             return Conflict(new { message = BookingErrors.SlotOccupied });
         }
 
+        if (dto.Priority is not null) booking.Priority = dto.Priority.Value;
         booking.Date = confirmedDate;
         booking.Status = BookingStatus.Confirmed;
 
@@ -237,6 +248,81 @@ public class ReferralsController : ControllerBase
         {
             return Conflict(new { message = BookingErrors.SlotOccupied });
         }
+    }
+
+    [HttpPatch("{referralId}/department-priority")]
+    public async Task<ActionResult<ReferralDto>> UpdateDepartmentPriority(
+        string referralId,
+        [FromBody] UpdateDepartmentPriorityDto dto,
+        CancellationToken cancellationToken)
+    {
+        var id = ParseReferralId(referralId);
+        if (id is null) return BadRequest(new { message = "Ogiltigt remiss-id." });
+
+        if (dto.DepartmentPriority is < 1 or > 3)
+            return BadRequest(new { message = "Avdelningsprioritet måste vara 1, 2 eller 3." });
+
+        var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
+        if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
+        if (!CanSubmitDepartmentAction(booking)) return Forbid();
+
+        booking.DepartmentPriority = dto.DepartmentPriority;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok(new ReferralDto
+        {
+            ReferralId = booking.BookingId,
+            BookingId = booking.BookingId,
+            PatientId = booking.PatientId,
+            TreatmentTypeId = booking.TreatmentType,
+            Department = booking.ReferralDepartment ?? string.Empty,
+            ContactName = booking.ReferralContactName,
+            ContactPhone = booking.ReferralContactPhone,
+            Priority = booking.Priority,
+            DepartmentPriority = booking.DepartmentPriority,
+            Status = booking.Status == BookingStatus.Confirmed
+                ? ReferralStatus.Scheduled
+                : booking.Status == BookingStatus.Cancelled
+                    ? ReferralStatus.Cancelled
+                    : ReferralStatus.Submitted,
+            RequestedStartDate = booking.Date,
+            CreatedAt = booking.CreatedAt,
+            ExternalPatientId = booking.ExternalPatientId,
+            SourceSystem = booking.SourceSystem,
+            CareUnitId = booking.CareUnitId,
+            DepartmentId = booking.DepartmentId,
+            TreatmentUnitId = booking.TreatmentUnitId,
+            RegionCode = booking.RegionCode,
+            IntegrationStatus = booking.IntegrationStatus.ToString()
+        });
+    }
+
+    [HttpPost("{referralId}/actions/patient-action")]
+    public async Task<ActionResult<ReferralActionDto>> RecordPatientAction(
+        string referralId,
+        [FromBody] CreateReferralActionDto dto,
+        CancellationToken cancellationToken)
+    {
+        var id = ParseReferralId(referralId);
+        if (id is null) return BadRequest(new { message = "Ogiltigt remiss-id." });
+
+        if (dto.ActionType is not (ReferralActionType.PatientPaused or ReferralActionType.PatientCancelled or ReferralActionType.PatientEnded))
+            return BadRequest(new { message = "Ogiltig patientåtgärd." });
+
+        if (string.IsNullOrWhiteSpace(dto.Comment))
+            return BadRequest(new { message = "Kommentar/orsak krävs för patientåtgärden." });
+
+        var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
+        if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
+        if (!CanRecordPatientAction(booking)) return Forbid();
+
+        if (dto.ActionType == ReferralActionType.PatientCancelled)
+        {
+            booking.Status = BookingStatus.Cancelled;
+            booking.CancellationReason = dto.Comment.Trim();
+        }
+
+        return await CreateAction(id.Value, dto, dto.ActionType, PatientActionTitle(dto.ActionType), cancellationToken);
     }
 
     private async Task<ActionResult<ReferralActionDto>> CreateAction(
@@ -264,7 +350,7 @@ public class ReferralsController : ControllerBase
 
         var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
         if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
-        if (!CanViewReferral(booking)) return Forbid();
+        if (!CanSubmitDepartmentAction(booking)) return Forbid();
 
         return await CreateAction(id.Value, dto, actionType, title, cancellationToken);
     }
@@ -279,6 +365,8 @@ public class ReferralsController : ControllerBase
         var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == referralId, cancellationToken);
         if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
 
+        if (!CanViewReferral(booking)) return Forbid();
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorId)) return Forbid();
         var action = new ReferralAction
         {
             ReferralId = referralId,
@@ -287,7 +375,7 @@ public class ReferralsController : ControllerBase
             Comment = dto.Comment,
             Priority = dto.Priority,
             ConfirmedDateTime = dto.ConfirmedDateTime is null ? null : NormalizeToMinute(dto.ConfirmedDateTime.Value),
-            CreatedById = dto.CreatedById,
+            CreatedById = actorId,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -322,7 +410,21 @@ public class ReferralsController : ControllerBase
             ReferralActionType.CompletionSubmitted => "info",
             ReferralActionType.Prioritized => "success",
             ReferralActionType.TimeConfirmed => "success",
+            ReferralActionType.PatientPaused => "warning",
+            ReferralActionType.PatientCancelled => "danger",
+            ReferralActionType.PatientEnded => "info",
             _ => "info"
+        };
+    }
+
+    private static string PatientActionTitle(ReferralActionType actionType)
+    {
+        return actionType switch
+        {
+            ReferralActionType.PatientPaused => "Behandling pausad",
+            ReferralActionType.PatientCancelled => "Tid avbokad",
+            ReferralActionType.PatientEnded => "Behandling avslutad",
+            _ => "Patientåtgärd"
         };
     }
 
@@ -379,15 +481,15 @@ public class ReferralsController : ControllerBase
         if (actionType is ReferralActionType.CompletionRequested or ReferralActionType.Prioritized or ReferralActionType.TimeConfirmed)
         {
             return users
-                .Where(user => !string.IsNullOrWhiteSpace(booking.CareUnitId ?? booking.ReferralDepartment) &&
-                               string.Equals(user.CareUnitId, booking.CareUnitId ?? booking.ReferralDepartment, StringComparison.OrdinalIgnoreCase))
+                .Where(user => AccessRoles.IsDepartmentUser(user.Role?.RoleName) && !string.IsNullOrWhiteSpace(booking.DepartmentId ?? booking.CareUnitId ?? booking.ReferralDepartment) &&
+                               string.Equals(user.CareUnitId, booking.DepartmentId ?? booking.CareUnitId ?? booking.ReferralDepartment, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
-        if (actionType == ReferralActionType.CompletionSubmitted)
+        if (actionType is ReferralActionType.CompletionSubmitted or ReferralActionType.PatientPaused or ReferralActionType.PatientCancelled or ReferralActionType.PatientEnded)
         {
             return users
-                .Where(user => AccessRoles.IsTreatmentUnit(user.Role?.RoleName))
+                .Where(user => AccessRoles.IsAdmin(user.Role?.RoleName) || (!string.IsNullOrWhiteSpace(booking.TreatmentUnitId) && AccessRoles.IsReferralDecisionUser(user.Role?.RoleName) && string.Equals(user.CareUnitId, booking.TreatmentUnitId, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
         }
 
@@ -406,23 +508,37 @@ public class ReferralsController : ControllerBase
             ReferralActionType.CompletionSubmitted => $"Remiss #{booking.BookingId} från {department} har kompletterats.",
             ReferralActionType.Prioritized => $"Remiss #{booking.BookingId} från {department} har prioriterats.",
             ReferralActionType.TimeConfirmed => $"Remiss #{booking.BookingId} från {department} har fått bekräftad behandlingstid.",
+            ReferralActionType.PatientPaused => $"Behandling för remiss #{booking.BookingId} från {department} har pausats.",
+            ReferralActionType.PatientCancelled => $"Behandlingstid för remiss #{booking.BookingId} från {department} har avbokats.",
+            ReferralActionType.PatientEnded => $"Behandling för remiss #{booking.BookingId} från {department} har avslutats.",
             _ => $"Remiss #{booking.BookingId} från {department} har uppdaterats."
         };
     }
 
-    private bool CanViewReferral(Booking booking)
-    {
-        if (CanManageReferralQueue()) return true;
+    private IQueryable<Booking> ScopedBookings() => CareUnitPatientAccess.RestrictBookings(_context,BookingAccess.Query(_context.Bookings, GetRole(), GetCareUnitId()),GetRole(),GetCareUnitId());
+    private bool CanViewReferral(Booking booking) => BookingAccess.CanRead(GetRole(), GetCareUnitId(), booking.DepartmentId ?? booking.CareUnitId ?? booking.ReferralDepartment, booking.TreatmentUnitId) && (AccessRoles.IsAdmin(GetRole()) || CareUnitPatientAccess.Query(_context,GetCareUnitId() ?? "",GetRole()).Any(p=>p.PatientId==booking.PatientId));
 
+    private bool CanSubmitDepartmentAction(Booking booking)
+    {
+        return AccessRoles.IsDepartmentUser(GetRole()) && IsOwnCareUnitReferral(booking) && CanViewReferral(booking);
+    }
+
+    private bool CanRecordPatientAction(Booking booking)
+    {
+        return AccessRoles.IsDepartmentUser(GetRole()) && IsOwnCareUnitReferral(booking) && CanViewReferral(booking);
+    }
+
+    private bool IsOwnCareUnitReferral(Booking booking)
+    {
         var careUnitId = GetCareUnitId();
         return !string.IsNullOrWhiteSpace(careUnitId) &&
-               string.Equals(booking.CareUnitId ?? booking.ReferralDepartment, careUnitId, StringComparison.OrdinalIgnoreCase);
+               string.Equals(booking.DepartmentId ?? booking.CareUnitId ?? booking.ReferralDepartment, careUnitId, StringComparison.OrdinalIgnoreCase);
     }
 
     private bool CanManageReferralQueue()
     {
         var role = GetRole();
-        return AccessRoles.IsTreatmentUnit(role);
+        return AccessRoles.IsReferralDecisionUser(role);
     }
 
     private string? GetRole()

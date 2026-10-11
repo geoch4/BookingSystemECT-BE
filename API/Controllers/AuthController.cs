@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using BookingSystem.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 ﻿// Backend purpose: Exposes HTTP endpoints for the AuthController backend feature.
 using BookingSystem.Application.Commands.UserCommands.CreateUser;
 using BookingSystem.Application.Commands.UserCommands.LogInUser;
@@ -19,6 +22,19 @@ namespace API.Controllers
         public AuthController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromServices] AppDbContext context, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Unauthorized();
+            var version = User.FindFirstValue("session_version");
+            var nextVersion = Guid.NewGuid().ToString("N");
+            // Compare-and-swap prevents a delayed logout from revoking a newer session.
+            await context.Users.Where(u => u.UserId == userId && u.SessionVersion == version)
+                .ExecuteUpdateAsync(s => s.SetProperty(u => u.SessionVersion, nextVersion), cancellationToken);
+            return NoContent();
         }
 
         [HttpPost("login")]

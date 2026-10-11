@@ -6,7 +6,8 @@ using MediatR;
 
 namespace BookingSystem.Application.Behaviors;
 
-public class LoggingBehavior < TRequest, TResponse> :IPipelineBehavior<TRequest, TResponse>
+public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
 {
     public async Task<TResponse> Handle(
         TRequest request, RequestHandlerDelegate<TResponse> next,
