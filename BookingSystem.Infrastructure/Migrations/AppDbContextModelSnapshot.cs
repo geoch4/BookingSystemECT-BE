@@ -120,6 +120,12 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DepartmentId").HasMaxLength(120).HasColumnType("nvarchar(120)");
+                    b.Property<string>("TreatmentUnitId").HasMaxLength(120).HasColumnType("nvarchar(120)");
+
+                    b.Property<int?>("DepartmentPriority")
+                        .HasColumnType("int");
+
                     b.Property<string>("ExternalPatientId")
                         .HasMaxLength(160)
                         .HasColumnType("nvarchar(160)");
@@ -431,6 +437,8 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("SessionVersion").IsRequired().HasMaxLength(32).HasColumnType("nvarchar(32)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -517,6 +525,19 @@ namespace BookingSystem.Infrastructure.Migrations
                 {
                     b.Navigation("Users");
                 });
+            modelBuilder.Entity("BookingSystem.Domain.Entities.PatientCareUnit", b => {
+                b.Property<int>("PatientId").HasColumnType("int");
+                b.Property<string>("UnitId").HasMaxLength(120).HasColumnType("nvarchar(120)");
+                b.Property<string>("Kind").HasMaxLength(20).HasColumnType("nvarchar(20)");
+                b.Property<bool>("IsActive").HasColumnType("bit");
+                b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
+                b.Property<string>("Reason").IsRequired().HasMaxLength(500).HasColumnType("nvarchar(500)");
+                b.HasKey("PatientId", "UnitId", "Kind");
+                b.HasIndex("UnitId", "Kind", "IsActive");
+                b.ToTable("PatientCareUnits");
+                b.HasOne("BookingSystem.Domain.Entities.Patient", "Patient").WithMany().HasForeignKey("PatientId").OnDelete(DeleteBehavior.Cascade).IsRequired();
+                b.Navigation("Patient");
+            });
 #pragma warning restore 612, 618
         }
     }

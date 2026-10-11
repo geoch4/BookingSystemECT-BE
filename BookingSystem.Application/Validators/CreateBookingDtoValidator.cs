@@ -27,6 +27,11 @@ public class CreateBookingDtoValidator : AbstractValidator<CreateBookingDto>
         RuleFor(x => x.Status)
             .IsInEnum().WithMessage("Invalid status");
 
+        RuleFor(x => x.DepartmentPriority)
+            .InclusiveBetween(1, 3)
+            .When(x => x.DepartmentPriority.HasValue)
+            .WithMessage("DepartmentPriority must be between 1 and 3");
+
         RuleFor(x => x.HealthDeclarationStatus)
             .IsInEnum().WithMessage("Invalid health declaration status");
 

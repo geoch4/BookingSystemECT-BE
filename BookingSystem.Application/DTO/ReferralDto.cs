@@ -13,6 +13,7 @@ public class ReferralDto
     public string? ContactName { get; set; }
     public string? ContactPhone { get; set; }
     public BookingPriority Priority { get; set; }
+    public int? DepartmentPriority { get; set; }
     public ReferralStatus Status { get; set; }
     public DateTime? RequestedStartDate { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -20,6 +21,9 @@ public class ReferralDto
     public string? ExternalPatientId { get; set; }
     public string SourceSystem { get; set; } = "Manual";
     public string? CareUnitId { get; set; }
+        public string? DepartmentId { get; set; }
+        public string? TreatmentUnitId { get; set; }
+
     public string? RegionCode { get; set; }
     public string IntegrationStatus { get; set; } = "Manual";
 }
@@ -44,6 +48,11 @@ public class CreateReferralActionDto
     public BookingPriority? Priority { get; set; }
     public DateTime? ConfirmedDateTime { get; set; }
     public int? CreatedById { get; set; }
+}
+
+public class UpdateDepartmentPriorityDto
+{
+    public int? DepartmentPriority { get; set; }
 }
 
 public class ReferralTimelineEventDto

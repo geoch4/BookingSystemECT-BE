@@ -5,5 +5,8 @@ public enum ReferralActionType
     CompletionRequested,
     CompletionSubmitted,
     Prioritized,
-    TimeConfirmed
+    TimeConfirmed,
+    PatientPaused,
+    PatientCancelled,
+    PatientEnded
 }

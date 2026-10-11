@@ -19,6 +19,7 @@ public static class DtoMapper
             CreatedAt = booking.CreatedAt,
             Priority = booking.Priority,
             Status = booking.Status,
+            DepartmentPriority = booking.DepartmentPriority,
             HealthDeclarationStatus = booking.HealthDeclarationStatus,
             AnesthesiaAssessmentStatus = booking.AnesthesiaAssessmentStatus,
             ReferralDepartment = booking.ReferralDepartment,
@@ -28,6 +29,8 @@ public static class DtoMapper
             ExternalPatientId = booking.ExternalPatientId,
             SourceSystem = booking.SourceSystem,
             CareUnitId = booking.CareUnitId,
+            DepartmentId = booking.DepartmentId,
+            TreatmentUnitId = booking.TreatmentUnitId,
             RegionCode = booking.RegionCode,
             IntegrationStatus = booking.IntegrationStatus.ToString()
         };

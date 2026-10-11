@@ -71,21 +71,8 @@ namespace API
                 builder.Configuration.GetSection("Integrations"));
             builder.Services.AddScoped<IExternalIntegrationGateway, DisabledExternalIntegrationGateway>();
             
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy(AccessPolicies.OnlyAdmin, policy =>
-                    policy.Requirements.Add(new RoleRequirement(AccessRoles.Admin)));
+            builder.Services.AddAccountAuthorization();
 
-                options.AddPolicy(AccessPolicies.TreatmentUnit, policy =>
-                    policy.Requirements.Add(new RoleRequirement(AccessRoles.TreatmentUnit)));
-
-                options.AddPolicy(AccessPolicies.CareStaff, policy =>
-                    policy.Requirements.Add(new RoleRequirement(AccessRoles.AuthenticatedCareUsers)));
-            });
-            builder.Services.AddSingleton<IAuthorizationHandler, RoleRequirementHandler>();
-
-            
-            
             // Discover commands, queries, and handlers from the application assembly.
             builder.Services.AddMediatR(cfg =>
             {
@@ -113,24 +100,7 @@ namespace API
 
             
             // Validate bearer tokens against the configured issuer, audience, lifetime, and signing key.
-            builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
-                    };
-                });
+            builder.Services.AddAccountJwtAuthentication(builder.Configuration);
 
             // The seeder runs after migrations and only fills development tables that are empty.
             builder.Services.AddScoped<DatabaseSeeder>();

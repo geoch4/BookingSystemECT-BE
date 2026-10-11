@@ -31,14 +31,15 @@ public class AuthService
         return result; // Preserve the full operation result instead of returning only the user identifier.
     }
 
-    public string GenerateJwtToken(int userId, string name, string? role, string? careUnitId)
+    public string GenerateJwtToken(int userId, string name, string? role, string? careUnitId, string? sessionVersion = null)
     {
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(ClaimTypes.Name, name),
             new Claim(ClaimTypes.Role, role ?? ""),
-            new Claim("care_unit", careUnitId ?? "")
+            new Claim("care_unit", careUnitId ?? ""),
+            new Claim("session_version", sessionVersion ?? "")
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));

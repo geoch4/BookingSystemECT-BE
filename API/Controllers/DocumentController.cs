@@ -15,7 +15,7 @@ namespace API.Controllers;
 
 
 [ApiController]
-[Authorize(Policy = AccessPolicies.TreatmentUnit)]
+[Authorize(Policy = AccessPolicies.OnlyAdmin)]
 [Route("api/[controller]")]
 public class DocumentController : ControllerBase
 {
@@ -44,8 +44,13 @@ public class DocumentController : ControllerBase
     public async Task<IActionResult> GetDocumentById(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetDocumentByIdQuery(id));
+        if (result is null)
+            return NotFound();
         if (!result.Success)
-            return NotFound(result.ErrorMessage);;
+            return NotFound(result.ErrorMessage);
+        if (result.Data is null)
+            return NotFound();
+
         await _auditLogWriter.RecordReadAsync("Document", id.ToString(), cancellationToken);
         return Ok(result.Data);
     }
@@ -79,8 +84,7 @@ public class DocumentController : ControllerBase
     {
         var result = await _mediator.Send(new DeleteDocumentCommand(id));
         if (!result.Success) return NotFound();
-        return NotFound(result.ErrorMessage);
-        
+
         return Ok(new { message = result.Message });
     }
 }

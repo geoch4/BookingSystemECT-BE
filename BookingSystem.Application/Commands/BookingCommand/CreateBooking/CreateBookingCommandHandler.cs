@@ -48,6 +48,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             CreatedAt = dto.CreatedAt,
             Priority = dto.Priority,
             Status = dto.Status,
+            DepartmentPriority = dto.DepartmentPriority,
             HealthDeclarationStatus = dto.HealthDeclarationStatus,
             AnesthesiaAssessmentStatus = dto.AnesthesiaAssessmentStatus,
             ReferralDepartment = dto.ReferralDepartment,
@@ -57,11 +58,16 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             ExternalPatientId = dto.ExternalPatientId,
             SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem),
             CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment,
+            DepartmentId = dto.DepartmentId ?? dto.CareUnitId ?? dto.ReferralDepartment,
+            TreatmentUnitId = dto.TreatmentUnitId,
             RegionCode = dto.RegionCode,
             IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus)
         };
 
         _context.Bookings.Add(booking);
+        if (!string.IsNullOrWhiteSpace(booking.DepartmentId)) await PatientUnitMemberships.Grant(_context,booking.PatientId,booking.DepartmentId,"department","Remiss från avdelningen");
+        if (!string.IsNullOrWhiteSpace(booking.TreatmentUnitId))
+            await PatientUnitMemberships.Grant(_context,booking.PatientId,booking.TreatmentUnitId,"treatment","Remiss till behandlingsenheten");
         try
         {
             await _context.SaveChangesAsync(cancellationToken);

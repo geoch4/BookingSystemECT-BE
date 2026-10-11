@@ -18,7 +18,7 @@ namespace API.Controllers;
 // TODO: Align the corresponding MediatR handlers with OperationResult.
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = AccessPolicies.CareStaff)]
 [Route("api/[controller]")]
 public class NotificationController : ControllerBase
 {

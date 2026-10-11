@@ -8,6 +8,8 @@ using BookingSystem.Application.DTO;
 using BookingSystem.Application.Queries.QueriesBooking.GetAllBookings;
 using BookingSystem.Application.Queries.QueriesBooking.GetBookingById;
 using MediatR;
+using BookingSystem.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,16 +18,18 @@ namespace API.Controllers
 {
     
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = AccessPolicies.CareStaff)]
     [Route("api/[controller]")]
     public class BookingController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly AppDbContext _context;
         private readonly AuditLogWriter _auditLogWriter;
 
-        public BookingController(IMediator mediator, AuditLogWriter auditLogWriter)
+        public BookingController(IMediator mediator, AuditLogWriter auditLogWriter, AppDbContext context)
         {
             _mediator = mediator;
+            _context = context;
             _auditLogWriter = auditLogWriter;
         }
 
@@ -48,7 +52,9 @@ namespace API.Controllers
         public async Task<ActionResult<BookingDto>> GetBookingById(int id, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(new GetBookingByIdQuery(id));
-            if(!result.Success)
+            if (result is null)
+                return NotFound();
+            if (!result.Success)
                 return NotFound(result.ErrorMessage);
 
             if (result.Data is null || !CanAccessBooking(result.Data)) return Forbid();
@@ -61,7 +67,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
         {
-            if (!CanManageAllBookings())
+            if (!AccessRoles.IsAdmin(GetRole()) && !AccessRoles.IsDepartmentUser(GetRole())) return Forbid();
+            if (!AccessRoles.IsAdmin(GetRole()))
             {
                 var careUnitId = GetCareUnitId();
                 if (string.IsNullOrWhiteSpace(careUnitId)) return Forbid();
@@ -72,10 +79,17 @@ namespace API.Controllers
                     return Forbid();
                 }
 
+                if (!await CareUnitPatientAccess.Query(_context, careUnitId).AnyAsync(patient => patient.PatientId == dto.PatientId)) return Forbid();
                 dto.ReferralDepartment = careUnitId;
                 dto.CareUnitId = careUnitId;
+                dto.DepartmentId = careUnitId;
             }
 
+            if (!string.IsNullOrWhiteSpace(dto.TreatmentUnitId) && !(await TreatmentUnitDirectory.GetIds(_context)).Contains(dto.TreatmentUnitId, StringComparer.OrdinalIgnoreCase)) return BadRequest(new { message = "Okänd behandlingsenhet." });
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorId)) return Forbid();
+            dto.CreatedById = actorId;
+            dto.CreatedAt = DateTime.UtcNow;
+            if (!AccessRoles.IsAdmin(GetRole())) { dto.Status = BookingSystem.Domain.Enums.BookingStatus.Pending; dto.Priority = BookingSystem.Domain.Enums.BookingPriority.Green; }
             var result = await _mediator.Send(new CreateBookingCommand(dto));
 
             // A database-enforced slot collision is exposed as HTTP 409 to support concurrent clients.
@@ -90,7 +104,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBooking(int id, [FromBody] CreateBookingDto dto)
         {
-            if (!CanManageAllBookings()) return Forbid();
+            if (!AccessRoles.IsAdmin(GetRole())) return Forbid();
 
             var result = await _mediator.Send(new UpdateBookingCommand(id, dto));
             if (!result.Success)
@@ -111,7 +125,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {
-            if (!CanManageAllBookings()) return Forbid();
+            if (!AccessRoles.IsAdmin(GetRole())) return Forbid();
 
             var result = await _mediator.Send(new DeleteBookingCommand(id));
             if (!result) return NotFound();
@@ -119,30 +133,27 @@ namespace API.Controllers
             return Ok(new { message = "Booking successfully deleted" });
         }
 
-        private IEnumerable<BookingDto> FilterBookingsForCurrentUser(IEnumerable<BookingDto> bookings)
+        [HttpPut("{id}/treatment-unit")]
+        public async Task<IActionResult> AssignTreatmentUnit(int id, [FromBody] AssignTreatmentUnitDto dto)
         {
-            if (CanManageAllBookings()) return bookings;
-
-            var careUnitId = GetCareUnitId();
-            if (string.IsNullOrWhiteSpace(careUnitId)) return [];
-
-            return bookings.Where(booking =>
-                string.Equals(booking.CareUnitId ?? booking.ReferralDepartment, careUnitId, StringComparison.OrdinalIgnoreCase));
+            if (!AccessRoles.IsAdmin(GetRole())) return Forbid();
+            if (string.IsNullOrWhiteSpace(dto.TreatmentUnitId) || !(await TreatmentUnitDirectory.GetIds(_context)).Contains(dto.TreatmentUnitId, StringComparer.OrdinalIgnoreCase)) return BadRequest(new { message = "Välj en registrerad behandlingsenhet." });
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking is null) return NotFound();
+            var oldUnit = booking.TreatmentUnitId;
+            booking.TreatmentUnitId = dto.TreatmentUnitId;
+            await PatientUnitMemberships.Grant(_context, booking.PatientId,dto.TreatmentUnitId,"treatment","Administratör tilldelade remiss");
+            await PatientUnitMemberships.RevokeUnusedTreatment(_context,booking.PatientId,oldUnit);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
+        public record AssignTreatmentUnitDto(string TreatmentUnitId);
 
-        private bool CanAccessBooking(BookingDto booking)
-        {
-            if (CanManageAllBookings()) return true;
+        private IEnumerable<BookingDto> FilterBookingsForCurrentUser(IEnumerable<BookingDto> bookings) => bookings.Where(CanAccessBooking);
+        private bool CanAccessBooking(BookingDto booking) => BookingAccess.CanRead(GetRole(), GetCareUnitId(), booking.DepartmentId ?? booking.CareUnitId ?? booking.ReferralDepartment, booking.TreatmentUnitId)
+            && (AccessRoles.IsAdmin(GetRole()) || CareUnitPatientAccess.Query(_context, GetCareUnitId() ?? "", GetRole()).Any(p=>p.PatientId==booking.PatientId));
 
-            var careUnitId = GetCareUnitId();
-            return !string.IsNullOrWhiteSpace(careUnitId) &&
-                   string.Equals(booking.CareUnitId ?? booking.ReferralDepartment, careUnitId, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private bool CanManageAllBookings()
-        {
-            return AccessRoles.IsTreatmentUnit(User.FindFirstValue(ClaimTypes.Role));
-        }
+        private string? GetRole() => User.FindFirstValue(ClaimTypes.Role);
 
         private string? GetCareUnitId()
         {

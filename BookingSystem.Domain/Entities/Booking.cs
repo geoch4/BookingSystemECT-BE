@@ -15,13 +15,13 @@ namespace BookingSystem.Domain.Entities
         [Required]
 
         public int PatientId { get; set; }
-        public Patient Patient { get; set; }
+        public Patient Patient { get; set; } = null!;
 
         public TreatmentType TreatmentType { get; set; }
 
         [Column("CreatedById")]
         public int CreatedByUserId { get; set; }
-        public User CreatedBy { get; set; }
+        public User? CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
@@ -29,6 +29,8 @@ namespace BookingSystem.Domain.Entities
         public BookingPriority Priority { get; set; }
         [Required]
         public BookingStatus Status { get; set; }
+
+        public int? DepartmentPriority { get; set; }
 
         public AssessmentStatus HealthDeclarationStatus { get; set; }
         public AssessmentStatus AnesthesiaAssessmentStatus { get; set; }
@@ -54,6 +56,12 @@ namespace BookingSystem.Domain.Entities
 
         [MaxLength(120)]
         public string? CareUnitId { get; set; }
+
+        [MaxLength(120)]
+        public string? DepartmentId { get; set; }
+
+        [MaxLength(120)]
+        public string? TreatmentUnitId { get; set; }
 
         [MaxLength(20)]
         public string? RegionCode { get; set; }

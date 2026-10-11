@@ -14,7 +14,7 @@ namespace BookingSystem.Infrastructure.Repositories
             _context = context;
         }
         // Retrieve one booking by its identifier.
-        public async Task<Booking> GetByIdAsync(int BookingId)
+        public async Task<Booking?> GetByIdAsync(int BookingId)
         {
             return await _context.Bookings
                 .Include(b => b.Patient)

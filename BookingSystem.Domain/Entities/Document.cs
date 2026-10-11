@@ -14,11 +14,11 @@ namespace BookingSystem.Domain.Entities
         public int DocumentId { get; set; }
 
         [Required]
-        public string FileName { get; set; } 
+        public string FileName { get; set; } = string.Empty;
 
         public bool Verified { get; set; } 
 
         public int UploadedByUserId { get; set; }
-        public User UploadedBy { get; set; }
+        public User? UploadedBy { get; set; }
     }
 }

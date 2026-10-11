@@ -19,9 +19,10 @@ namespace BookingSystem.Application.Service.Implementation
             _repository = repository;
         }
 
-        public async Task<BookingDto> GetBookingByIdAsync(int id)
+        public async Task<BookingDto?> GetBookingByIdAsync(int id)
         {
             var booking = await _repository.GetByIdAsync(id);
+            if (booking is null) return null;
 
             return DtoMapper.ToDto(booking);
         }
@@ -43,6 +44,7 @@ namespace BookingSystem.Application.Service.Implementation
                 CreatedAt = dto.CreatedAt,
                 Priority = dto.Priority,
                 Status = dto.Status,
+                DepartmentPriority = dto.DepartmentPriority,
                 ReferralDepartment = dto.ReferralDepartment,
                 ReferralContactName = dto.ReferralContactName,
                 ReferralContactPhone = dto.ReferralContactPhone,
@@ -61,6 +63,7 @@ namespace BookingSystem.Application.Service.Implementation
         public async Task<bool> UpdateBookingAsync(int id, CreateBookingDto dto)
         {
             var booking = await _repository.GetByIdAsync(id);
+            if (booking is null) return false;
 
             booking.Date = dto.Date;
             booking.PatientId = dto.PatientId;
@@ -69,6 +72,7 @@ namespace BookingSystem.Application.Service.Implementation
             booking.CreatedAt = dto.CreatedAt;
             booking.Priority = dto.Priority;
             booking.Status = dto.Status;
+            booking.DepartmentPriority = dto.DepartmentPriority;
             booking.ReferralDepartment = dto.ReferralDepartment;
             booking.ReferralContactName = dto.ReferralContactName;
             booking.ReferralContactPhone = dto.ReferralContactPhone;
@@ -86,6 +90,7 @@ namespace BookingSystem.Application.Service.Implementation
         public async Task<bool> DeleteBookingAsync(int id)
         {
             var booking = await _repository.GetByIdAsync(id);
+            if (booking is null) return false;
 
             await _repository.DeleteAsync(booking);
             return true;

@@ -8,26 +8,41 @@ public static class AccessRoles
     public const string Admin = "Admin";
     public const string Department = "Avdelning";
 
+    public static readonly string[] MedicalResponsible =
+    [
+        "Medicinskt ansvarig",
+        "Överläkare",
+        "Underläkare",
+        "Läkare"
+    ];
+
     public static readonly string[] TreatmentUnit =
     [
         Admin,
         "ECTSjuksköterska",
         "ECT-koordinator",
         "Behandlingsenhet",
-        "Treatment unit",
-        "Överläkare"
+        "Treatment unit"
+    ];
+
+    public static readonly string[] ReferralDecisionUsers =
+    [
+        .. TreatmentUnit,
+        .. MedicalResponsible
     ];
 
     public static readonly string[] DepartmentUsers =
     [
         Department,
         "Remitterande avdelning",
-        "Vårdavdelning"
+        "Vårdavdelning",
+        "Mottagning"
     ];
 
     public static readonly string[] AuthenticatedCareUsers =
     [
         .. TreatmentUnit,
+        .. MedicalResponsible,
         .. DepartmentUsers
     ];
 
@@ -39,6 +54,16 @@ public static class AccessRoles
     public static bool IsTreatmentUnit(string? role)
     {
         return IsAny(role, TreatmentUnit);
+    }
+
+    public static bool IsReferralDecisionUser(string? role)
+    {
+        return IsAny(role, ReferralDecisionUsers);
+    }
+
+    public static bool IsMedicalResponsible(string? role)
+    {
+        return IsAny(role, MedicalResponsible);
     }
 
     public static bool IsDepartmentUser(string? role)

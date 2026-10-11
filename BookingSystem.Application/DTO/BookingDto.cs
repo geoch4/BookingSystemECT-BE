@@ -14,6 +14,7 @@ namespace BookingSystem.Application.DTO
         public DateTime CreatedAt { get; set; }
         public BookingPriority Priority { get; set; }
         public BookingStatus Status { get; set; }
+        public int? DepartmentPriority { get; set; }
         public AssessmentStatus HealthDeclarationStatus { get; set; }
         public AssessmentStatus AnesthesiaAssessmentStatus { get; set; }
         public string? ReferralDepartment { get; set; }
@@ -23,6 +24,9 @@ namespace BookingSystem.Application.DTO
         public string? ExternalPatientId { get; set; }
         public string SourceSystem { get; set; } = "Manual";
         public string? CareUnitId { get; set; }
+        public string? DepartmentId { get; set; }
+        public string? TreatmentUnitId { get; set; }
+
         public string? RegionCode { get; set; }
         public string IntegrationStatus { get; set; } = "Manual";
     }
@@ -36,6 +40,7 @@ namespace BookingSystem.Application.DTO
         public DateTime CreatedAt { get; set; }
         public BookingPriority Priority { get; set; }
         public BookingStatus Status { get; set; }
+        public int? DepartmentPriority { get; set; }
         public AssessmentStatus HealthDeclarationStatus { get; set; }
         public AssessmentStatus AnesthesiaAssessmentStatus { get; set; }
         public string? ReferralDepartment { get; set; }
@@ -45,6 +50,9 @@ namespace BookingSystem.Application.DTO
         public string? ExternalPatientId { get; set; }
         public string? SourceSystem { get; set; }
         public string? CareUnitId { get; set; }
+        public string? DepartmentId { get; set; }
+        public string? TreatmentUnitId { get; set; }
+
         public string? RegionCode { get; set; }
         public string? IntegrationStatus { get; set; }
     }
