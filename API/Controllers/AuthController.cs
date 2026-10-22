@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using BookingSystem.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ namespace API.Controllers
             return NoContent();
         }
 
+        [EnableRateLimiting(LoginRateLimiting.Policy)]
         [HttpPost("login")]
         public async Task<ActionResult<OperationResult<string>>> Login([FromBody] LoginDto dto)
         {

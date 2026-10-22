@@ -35,6 +35,8 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var deployment = DeploymentSafety.Read(builder.Configuration, builder.Environment.IsDevelopment());
+
             // Read authentication settings once so the same values configure JWT validation below.
             var jwtKey = builder.Configuration["Jwt:SecretKey"];
             var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -142,20 +144,13 @@ namespace API
 
             
             builder.Services.AddCors();
+            builder.Services.AddLoginRateLimiting();
 
             
             var app = builder.Build();
 
-            // Apply pending schema migrations before any request can reach the application.
-            using (var scope = app.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.Database.Migrate();
+            deployment.Initialize(app.Services).GetAwaiter().GetResult();
 
-                var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-                seeder.SeedData();
-            }
-            
             // Swagger is available only during local development.
             if (app.Environment.IsDevelopment())
             {
@@ -168,7 +163,7 @@ namespace API
             app.UseCors(corsPolicyBuilder =>
             {
                 corsPolicyBuilder
-                    .AllowAnyOrigin() // Replace with WithOrigins(...) when deployment origins are known.
+                    .WithOrigins(deployment.AllowedOrigins)
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             });
@@ -176,6 +171,8 @@ namespace API
             
             // Finish the request pipeline with HTTPS, security, and controller routing.
             app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

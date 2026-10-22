@@ -27,7 +27,7 @@ public class LogInUserCommandHandler : IRequestHandler<LogInUserCommand, Operati
         var user = await _context.Users.Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Email == dto.Email, cancellationToken);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        if (user == null || !PasswordVerification.Matches(dto.Password, user.PasswordHash))
             return OperationResult<string>.Fail("Ogiltig inloggning");
 
         var token = _authService.GenerateJwtToken(user.UserId, user.Fullname, user.Role.RoleName, user.CareUnitId, user.SessionVersion);
