@@ -140,3 +140,28 @@ Alternative Flows:
 ❗ If no available time slots exist, the user receives a message to choose another day.
 ❗ If the patient lacks approval from the senior doctor, a warning is displayed.
 ________________________________________________________________________________________________________________________________________________________________________________________________________
+
+## Konfiguration och hemligheter
+
+Inga hemligheter ligger i `appsettings.json`. API:et vägrar starta utanför Development om JWT-nyckeln eller anslutningssträngen saknas, och vägrar alltid nyckeln som tidigare låg i git.
+
+**Lokalt (Development)**
+
+```bash
+cd API
+dotnet user-secrets set "Jwt:SecretKey" "$(openssl rand -base64 48)"
+# Valfritt – standard är Server=.\SQLEXPRESS;Database=ECTDB i appsettings.Development.json
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=.\SQLEXPRESS;Database=ECTDB;Trusted_Connection=True;TrustServerCertificate=True;"
+```
+
+Saknas nyckeln i Development används en tillfällig nyckel i minnet, och inloggningar slutar då gälla vid omstart.
+
+**Test, pilot och produktion** – sätt via miljövariabler eller nyckelhanterare (t.ex. Azure Key Vault):
+
+| Inställning | Miljövariabel | Krav |
+| --- | --- | --- |
+| JWT-nyckel | `Jwt__SecretKey` | minst 32 byte, slumpad, unik per miljö |
+| Databas | `ConnectionStrings__DefaultConnection` | krävs |
+| Tillåtna origins | `Cors__AllowedOrigins__0` | HTTPS |
+
+**Felsvar**: utanför Development returnerar API:et bara ett allmänt meddelande och ett `traceId` vid oväntade fel. Detaljerna finns i serverloggen under samma `traceId`.

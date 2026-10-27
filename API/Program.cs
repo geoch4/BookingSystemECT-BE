@@ -37,9 +37,10 @@ namespace API
 
             var deployment = DeploymentSafety.Read(builder.Configuration, builder.Environment.IsDevelopment());
 
-            // Read authentication settings once so the same values configure JWT validation below.
-            var jwtKey = builder.Configuration["Jwt:SecretKey"];
-            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            // Secrets come from user-secrets (Development), environment variables or a key vault,
+            // never from appsettings.json. Startup stops if they are missing or known to be leaked.
+            var generatedJwtKey = ConfigurationSafety.EnsureJwtKey(builder.Configuration, builder.Environment.IsDevelopment());
+            ConfigurationSafety.RequireConnectionString(builder.Configuration, builder.Environment.IsDevelopment());
 
             // Register the SQL Server-backed EF Core context used by handlers and repositories.
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -148,6 +149,9 @@ namespace API
 
             
             var app = builder.Build();
+
+            if (generatedJwtKey)
+                app.Logger.LogWarning("Jwt:SecretKey saknas – en tillfällig utvecklingsnyckel används. Inloggningar slutar gälla när API:et startas om. Sätt en egen med: dotnet user-secrets set \"Jwt:SecretKey\" \"<minst 32 tecken>\" --project API");
 
             deployment.Initialize(app.Services).GetAwaiter().GetResult();
 
