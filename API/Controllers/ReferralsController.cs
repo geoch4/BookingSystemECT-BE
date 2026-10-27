@@ -1,6 +1,7 @@
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Authorization;
+using BookingSystem.Application.Mappings;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
 using BookingSystem.Infrastructure;
@@ -49,7 +50,7 @@ public class ReferralsController : ControllerBase
                     : b.Status == BookingStatus.Cancelled
                         ? ReferralStatus.Cancelled
                         : ReferralStatus.Submitted,
-                RequestedStartDate = b.Date,
+                RequestedStartDate = b.RequestedStartDate ?? b.Date,
                 CreatedAt = b.CreatedAt,
                 ExternalPatientId = b.ExternalPatientId,
                 SourceSystem = b.SourceSystem,
@@ -96,7 +97,7 @@ public class ReferralsController : ControllerBase
                     : b.Status == BookingStatus.Cancelled
                         ? ReferralStatus.Cancelled
                         : ReferralStatus.Submitted,
-                RequestedStartDate = b.Date,
+                RequestedStartDate = b.RequestedStartDate ?? b.Date,
                 CreatedAt = b.CreatedAt,
                 ExternalPatientId = b.ExternalPatientId,
                 SourceSystem = b.SourceSystem,
@@ -170,6 +171,27 @@ public class ReferralsController : ControllerBase
         return Ok(events.OrderBy(e => e.CreatedAt));
     }
 
+    // The clinical basis is health information: served per referral, behind the same access
+    // check as the referral itself, and every read is written to the audit log.
+    [HttpGet("{referralId}/clinical")]
+    public async Task<ActionResult<ReferralClinicalDetailsDto>> GetClinicalDetails(string referralId, CancellationToken cancellationToken)
+    {
+        var id = ParseReferralId(referralId);
+        if (id is null) return BadRequest(new { message = "Ogiltigt remiss-id." });
+
+        var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == id.Value, cancellationToken);
+        if (booking is null) return NotFound(new { message = "Remissen hittades inte." });
+        if (!CanViewReferral(booking)) return Forbid();
+
+        var details = await _context.ReferralClinicalDetails
+            .AsNoTracking()
+            .FirstOrDefaultAsync(d => d.BookingId == id.Value, cancellationToken);
+
+        await _auditLogWriter.RecordReadAsync("ReferralClinicalDetails", id.Value.ToString(), cancellationToken);
+        if (details is null) return NoContent();
+        return Ok(DtoMapper.ToDto(details));
+    }
+
     [HttpPost("{referralId}/actions/completion-request")]
     public Task<ActionResult<ReferralActionDto>> RequestCompletion(
         string referralId,
@@ -226,12 +248,8 @@ public class ReferralsController : ControllerBase
         if (dto.ConfirmedDateTime is null) return BadRequest(new { message = "Bekräftad tid saknas." });
 
         if (dto.Priority is not null && dto.Priority.Value != booking.Priority && !AccessRoles.IsAdmin(GetRole()) && !AccessRoles.IsMedicalResponsible(GetRole())) return Forbid();
-        var confirmedDate = NormalizeToMinute(dto.ConfirmedDateTime.Value);
-        if (await _context.Bookings.AnyAsync(
-                b => b.BookingId != booking.BookingId &&
-                     b.Date == confirmedDate &&
-                     b.Status != BookingStatus.Cancelled,
-                cancellationToken))
+        var confirmedDate = BookingSlots.NormalizeToMinute(dto.ConfirmedDateTime.Value);
+        if (await BookingSlots.IsOccupiedAsync(_context, booking.TreatmentUnitId, confirmedDate, booking.BookingId, cancellationToken))
         {
             return Conflict(new { message = BookingErrors.SlotOccupied });
         }
@@ -244,7 +262,7 @@ public class ReferralsController : ControllerBase
         {
             return await CreateAction(id.Value, dto, ReferralActionType.TimeConfirmed, "Tid bekräftad", cancellationToken);
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (BookingSlots.IsUniqueConstraintViolation(ex))
         {
             return Conflict(new { message = BookingErrors.SlotOccupied });
         }
@@ -285,7 +303,7 @@ public class ReferralsController : ControllerBase
                 : booking.Status == BookingStatus.Cancelled
                     ? ReferralStatus.Cancelled
                     : ReferralStatus.Submitted,
-            RequestedStartDate = booking.Date,
+            RequestedStartDate = booking.RequestedStartDate ?? booking.Date,
             CreatedAt = booking.CreatedAt,
             ExternalPatientId = booking.ExternalPatientId,
             SourceSystem = booking.SourceSystem,
@@ -374,7 +392,7 @@ public class ReferralsController : ControllerBase
             Title = title,
             Comment = dto.Comment,
             Priority = dto.Priority,
-            ConfirmedDateTime = dto.ConfirmedDateTime is null ? null : NormalizeToMinute(dto.ConfirmedDateTime.Value),
+            ConfirmedDateTime = dto.ConfirmedDateTime is null ? null : BookingSlots.NormalizeToMinute(dto.ConfirmedDateTime.Value),
             CreatedById = actorId,
             CreatedAt = DateTime.UtcNow
         };
@@ -440,16 +458,6 @@ public class ReferralsController : ControllerBase
         }
 
         return null;
-    }
-
-    private static DateTime NormalizeToMinute(DateTime date)
-    {
-        return new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, 0, date.Kind);
-    }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException exception)
-    {
-        return exception.InnerException is SqlException { Number: 2601 or 2627 };
     }
 
     private async Task AddReferralNotifications(Booking booking, ReferralActionType actionType, CancellationToken cancellationToken)

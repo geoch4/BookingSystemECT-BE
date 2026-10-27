@@ -27,14 +27,12 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     public async Task<OperationResult<BookingDto>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
         var dto = request.Dto;
-        // The frontend treats a minute as the slot key, so seconds cannot be used to bypass the lock.
-        var bookingDate = NormalizeToMinute(dto.Date);
+        var bookingDate = BookingSlots.NormalizeToMinute(dto.Date);
+        var treatmentUnitId = string.IsNullOrWhiteSpace(dto.TreatmentUnitId) ? null : dto.TreatmentUnitId.Trim();
 
-        // Return a friendly conflict before writing when the slot is already known to be occupied.
-        if (dto.Status != BookingStatus.Cancelled &&
-            await _context.Bookings.AnyAsync(
-                b => b.Date == bookingDate && b.Status != BookingStatus.Cancelled,
-                cancellationToken))
+        // Only a confirmed booking takes a slot; pending referrals may share a requested day.
+        if (dto.Status == BookingStatus.Confirmed &&
+            await BookingSlots.IsOccupiedAsync(_context, treatmentUnitId, bookingDate, null, cancellationToken))
         {
             return OperationResult<BookingDto>.Fail(BookingErrors.SlotOccupied);
         }
@@ -42,6 +40,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         var booking = new Booking
         {
             Date = bookingDate,
+            RequestedStartDate = (dto.RequestedStartDate ?? dto.Date).Date,
             PatientId = dto.PatientId,
             TreatmentType = dto.TreatmentType,
             CreatedByUserId = dto.CreatedById,
@@ -59,10 +58,13 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             SourceSystem = DtoMapper.CleanSourceSystem(dto.SourceSystem),
             CareUnitId = dto.CareUnitId ?? dto.ReferralDepartment,
             DepartmentId = dto.DepartmentId ?? dto.CareUnitId ?? dto.ReferralDepartment,
-            TreatmentUnitId = dto.TreatmentUnitId,
+            TreatmentUnitId = treatmentUnitId,
             RegionCode = dto.RegionCode,
             IntegrationStatus = DtoMapper.ParseIntegrationStatus(dto.IntegrationStatus)
         };
+
+        if (dto.ClinicalDetails is not null)
+            booking.ClinicalDetails = DtoMapper.ToEntity(dto.ClinicalDetails);
 
         _context.Bookings.Add(booking);
         if (!string.IsNullOrWhiteSpace(booking.DepartmentId)) await PatientUnitMemberships.Grant(_context,booking.PatientId,booking.DepartmentId,"department","Remiss från avdelningen");
@@ -72,7 +74,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (BookingSlots.IsUniqueConstraintViolation(ex))
         {
             // The unique filtered index is the atomic final guard when two requests race past the pre-check.
             return OperationResult<BookingDto>.Fail(BookingErrors.SlotOccupied);
@@ -81,16 +83,5 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         // Return the persisted values, including the database-generated booking identifier.
         var result = DtoMapper.ToDto(booking);
         return OperationResult<BookingDto>.Ok(result);
-    }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException exception)
-    {
-        // SQL Server uses 2601 and 2627 for duplicate unique-index or unique-constraint values.
-        return exception.InnerException is SqlException { Number: 2601 or 2627 };
-    }
-
-    private static DateTime NormalizeToMinute(DateTime date)
-    {
-        return new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, 0, date.Kind);
     }
 }

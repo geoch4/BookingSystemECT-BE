@@ -5,6 +5,7 @@ using BookingSystem.Application.Commands.BookingCommand.UpdateBooking;
 using BookingSystem.Application.Authorization;
 using BookingSystem.Application.Common;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Validators;
 using BookingSystem.Application.Queries.QueriesBooking.GetAllBookings;
 using BookingSystem.Application.Queries.QueriesBooking.GetBookingById;
 using MediatR;
@@ -25,6 +26,7 @@ namespace API.Controllers
         private readonly IMediator _mediator;
         private readonly AppDbContext _context;
         private readonly AuditLogWriter _auditLogWriter;
+        private static readonly ReferralClinicalDetailsDtoValidator ClinicalValidator = new();
 
         public BookingController(IMediator mediator, AuditLogWriter auditLogWriter, AppDbContext context)
         {
@@ -68,6 +70,12 @@ namespace API.Controllers
         public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
         {
             if (!AccessRoles.IsAdmin(GetRole()) && !AccessRoles.IsDepartmentUser(GetRole())) return Forbid();
+            if (dto.ClinicalDetails is not null)
+            {
+                // DTO validators are not run by the MediatR pipeline, so the clinical basis is checked here.
+                var clinical = await ClinicalValidator.ValidateAsync(dto.ClinicalDetails);
+                if (!clinical.IsValid) return BadRequest(new { message = clinical.Errors[0].ErrorMessage });
+            }
             if (!AccessRoles.IsAdmin(GetRole()))
             {
                 var careUnitId = GetCareUnitId();
@@ -140,6 +148,10 @@ namespace API.Controllers
             if (string.IsNullOrWhiteSpace(dto.TreatmentUnitId) || !(await TreatmentUnitDirectory.GetIds(_context)).Contains(dto.TreatmentUnitId, StringComparer.OrdinalIgnoreCase)) return BadRequest(new { message = "Välj en registrerad behandlingsenhet." });
             var booking = await _context.Bookings.FindAsync(id);
             if (booking is null) return NotFound();
+            // A confirmed booking takes its minute with it to the new unit; refuse if that minute is taken there.
+            if (booking.Status == BookingSystem.Domain.Enums.BookingStatus.Confirmed &&
+                await BookingSlots.IsOccupiedAsync(_context, dto.TreatmentUnitId, booking.Date, booking.BookingId))
+                return Conflict(new { message = BookingErrors.SlotOccupied });
             var oldUnit = booking.TreatmentUnitId;
             booking.TreatmentUnitId = dto.TreatmentUnitId;
             await PatientUnitMemberships.Grant(_context, booking.PatientId,dto.TreatmentUnitId,"treatment","Administratör tilldelade remiss");

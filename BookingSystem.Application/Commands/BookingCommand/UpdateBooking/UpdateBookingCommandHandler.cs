@@ -30,21 +30,17 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
             return OperationResult<bool>.Fail(BookingErrors.NotFound);
 
         var dto = request.Dto;
-        // Keep updates on the same minute-based slot definition used by booking creation.
-        var bookingDate = NormalizeToMinute(dto.Date);
+        var bookingDate = BookingSlots.NormalizeToMinute(dto.Date);
 
-        // Exclude the booking being edited while checking whether another active booking owns the target slot.
-        if (dto.Status != BookingStatus.Cancelled &&
-            await _context.Bookings.AnyAsync(
-                b => b.BookingId != request.Id &&
-                     b.Date == bookingDate &&
-                     b.Status != BookingStatus.Cancelled,
-                cancellationToken))
+        // Exclude the booking being edited; only confirmed bookings at the same unit compete for the slot.
+        if (dto.Status == BookingStatus.Confirmed &&
+            await BookingSlots.IsOccupiedAsync(_context, booking.TreatmentUnitId, bookingDate, request.Id, cancellationToken))
         {
             return OperationResult<bool>.Fail(BookingErrors.SlotOccupied);
         }
 
         booking.Date = bookingDate;
+        if (dto.RequestedStartDate is not null) booking.RequestedStartDate = dto.RequestedStartDate.Value.Date;
         booking.PatientId = dto.PatientId;
         booking.TreatmentType = dto.TreatmentType;
         booking.CreatedByUserId = dto.CreatedById;
@@ -69,23 +65,12 @@ public class UpdateBookingCommandHandler : IRequestHandler<UpdateBookingCommand,
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (BookingSlots.IsUniqueConstraintViolation(ex))
         {
             // The database index resolves concurrent updates atomically even if both pre-checks succeeded.
             return OperationResult<bool>.Fail(BookingErrors.SlotOccupied);
         }
 
         return OperationResult<bool>.Ok(true);
-    }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException exception)
-    {
-        // SQL Server uses 2601 and 2627 for duplicate unique-index or unique-constraint values.
-        return exception.InnerException is SqlException { Number: 2601 or 2627 };
-    }
-
-    private static DateTime NormalizeToMinute(DateTime date)
-    {
-        return new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, 0, date.Kind);
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using BookingSystem.Application.DTO;
 using BookingSystem.Domain.Entities;
 using BookingSystem.Domain.Enums;
@@ -13,6 +15,7 @@ public static class DtoMapper
         {
             BookingId = booking.BookingId,
             Date = booking.Date,
+            RequestedStartDate = booking.RequestedStartDate,
             PatientId = booking.PatientId,
             TreatmentType = booking.TreatmentType,
             CreatedById = booking.CreatedByUserId,
@@ -48,6 +51,61 @@ public static class DtoMapper
             RegionCode = patient.RegionCode,
             IntegrationStatus = patient.IntegrationStatus.ToString()
         };
+    }
+
+    public static ReferralClinicalDetails ToEntity(ReferralClinicalDetailsDto dto)
+    {
+        return new ReferralClinicalDetails
+        {
+            Indication = Clean(dto.Indication),
+            AnesthesiaInfo = Clean(dto.AnesthesiaInfo),
+            SomaticRisk = Clean(dto.SomaticRisk),
+            FastingConfirmed = dto.FastingConfirmed,
+            BloodPressure = Clean(dto.BloodPressure),
+            WeightKg = Clean(dto.WeightKg),
+            Allergies = Clean(dto.Allergies),
+            Medications = Clean(dto.Medications),
+            AdditionalInfo = Clean(dto.AdditionalInfo),
+            RtmsSessionPlan = Clean(dto.RtmsSessionPlan),
+            PreviousTreatments = Clean(dto.PreviousTreatments),
+            TreatmentGoal = Clean(dto.TreatmentGoal),
+            ContraindicationChecklistComplete = dto.ContraindicationChecklistComplete,
+            MetalImplantsOrDevices = dto.MetalImplantsOrDevices,
+            SeizureHistory = dto.SeizureHistory,
+            CompletedDocuments = dto.CompletedDocuments.Count == 0
+                ? null
+                : string.Join(",", dto.CompletedDocuments.Select(d => d.Trim()).Where(d => d.Length > 0).Distinct())
+        };
+    }
+
+    public static ReferralClinicalDetailsDto ToDto(ReferralClinicalDetails details)
+    {
+        return new ReferralClinicalDetailsDto
+        {
+            Indication = details.Indication,
+            AnesthesiaInfo = details.AnesthesiaInfo,
+            SomaticRisk = details.SomaticRisk,
+            FastingConfirmed = details.FastingConfirmed,
+            BloodPressure = details.BloodPressure,
+            WeightKg = details.WeightKg,
+            Allergies = details.Allergies,
+            Medications = details.Medications,
+            AdditionalInfo = details.AdditionalInfo,
+            RtmsSessionPlan = details.RtmsSessionPlan,
+            PreviousTreatments = details.PreviousTreatments,
+            TreatmentGoal = details.TreatmentGoal,
+            ContraindicationChecklistComplete = details.ContraindicationChecklistComplete,
+            MetalImplantsOrDevices = details.MetalImplantsOrDevices,
+            SeizureHistory = details.SeizureHistory,
+            CompletedDocuments = string.IsNullOrWhiteSpace(details.CompletedDocuments)
+                ? new List<string>()
+                : details.CompletedDocuments.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+        };
+    }
+
+    private static string? Clean(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
     public static IntegrationStatus ParseIntegrationStatus(string? value)

@@ -3,6 +3,8 @@ using BookingSystem.Application.Commands.PatientCommand.CreatePatient;
 using BookingSystem.Application.Commands.PatientCommand.DeletePatient;
 using BookingSystem.Application.Commands.PatientCommand.UpdatePatient;
 using BookingSystem.Application.Authorization;
+using BookingSystem.Application.Common;
+using BookingSystem.Application.Validators;
 using BookingSystem.Application.DTO;
 using BookingSystem.Application.Mappings;
 using BookingSystem.Application.Queries.QueriesPatient.GetAllPatient;
@@ -27,6 +29,7 @@ public class PatientsController : ControllerBase
     private readonly IMediator _mediator;
     private readonly AuditLogWriter _auditLogWriter;
     private readonly AppDbContext _context;
+    private static readonly CreatePatientDtoValidator Validator = new();
 
     public PatientsController(IMediator mediator, AuditLogWriter auditLogWriter, AppDbContext context)
     {
@@ -62,6 +65,8 @@ public class PatientsController : ControllerBase
     {
         var role = User.FindFirstValue(ClaimTypes.Role);
         if (!AccessRoles.IsAdmin(role) && !(AccessRoles.IsDepartmentUser(role) && !string.IsNullOrWhiteSpace(GetCareUnitId()))) return Forbid();
+        var invalid = await ValidateAndNormalize(dto);
+        if (invalid is not null) return invalid;
         var created = await _mediator.Send(new CreatePatientCommand(dto));
         return CreatedAtAction(nameof(GetById), new { id = created.PatientId }, created);
     }
@@ -70,6 +75,8 @@ public class PatientsController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] CreatePatientDto dto)
     {
         if (!CanManageAllPatients()) return Forbid();
+        var invalid = await ValidateAndNormalize(dto);
+        if (invalid is not null) return invalid;
 
         var success = await _mediator.Send(new UpdatePatientCommand(id, dto));
         if (!success) return NotFound();
@@ -151,6 +158,26 @@ public class PatientsController : ControllerBase
         return !string.IsNullOrWhiteSpace(careUnitId) &&
                await CareUnitPatientAccess.Query(_context, careUnitId, User.FindFirstValue(ClaimTypes.Role)).AnyAsync(patient => patient.PatientId == patientId,
                    cancellationToken);
+    }
+
+    // DTO validators are not run by the MediatR pipeline (it validates commands), so patient
+    // data is validated here, and the personnummer is stored in one form: ÅÅÅÅMMDD-XXXX.
+    private async Task<IActionResult?> ValidateAndNormalize(CreatePatientDto dto)
+    {
+        var result = await Validator.ValidateAsync(dto);
+        if (!result.IsValid)
+        {
+            return BadRequest(new
+            {
+                message = result.Errors[0].ErrorMessage,
+                errors = result.Errors.GroupBy(e => e.PropertyName).ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray())
+            });
+        }
+
+        Personnummer.TryNormalize(dto.SocialSecurityNumber, DateTime.Today, out var normalized);
+        dto.SocialSecurityNumber = normalized;
+        dto.FullName = dto.FullName.Trim();
+        return null;
     }
 
     private bool CanManageAllPatients()

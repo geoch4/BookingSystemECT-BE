@@ -1,6 +1,7 @@
 ﻿// Backend purpose: Validates incoming data for CreatePatientDtoValidator before application logic runs.
 using FluentValidation;
 using BookingSystem.Application.DTO;
+using BookingSystem.Application.Common;
 
 namespace BookingSystem.Application.Validators;
 
@@ -12,9 +13,11 @@ public class CreatePatientDtoValidator : AbstractValidator<CreatePatientDto>
             .NotEmpty().WithMessage("Full name is required");
 
         RuleFor(x => x.SocialSecurityNumber)
-            .NotEmpty().WithMessage("Social security number is required")
-            .Matches(@"^\d{6}-\d{4}$")
-            .WithMessage("SSN must be in format YYMMDD-XXXX");
+            .NotEmpty().WithMessage("Personnummer krävs.")
+            .Must(Personnummer.IsValid).WithMessage(Personnummer.FormatMessage);
+
+        RuleFor(x => x.FullName)
+            .MaximumLength(200).WithMessage("Namnet får vara högst 200 tecken.");
 
         RuleFor(x => x.ExternalPatientId)
             .MaximumLength(160).WithMessage("ExternalPatientId can be at most 160 characters");

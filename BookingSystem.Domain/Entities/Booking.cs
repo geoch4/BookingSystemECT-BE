@@ -10,8 +10,16 @@ namespace BookingSystem.Domain.Entities
     {
         [Key]
         public int BookingId { get; set; }
+        // The treatment slot. It only occupies capacity once the booking is Confirmed;
+        // for a pending referral it is a placeholder and never blocks other referrals.
         [Required]
         public DateTime Date { get; set; }
+
+        // The start date the referring department asked for. Kept apart from Date so
+        // two departments can ask for the same day without colliding.
+        public DateTime? RequestedStartDate { get; set; }
+
+        public ReferralClinicalDetails? ClinicalDetails { get; set; }
         [Required]
 
         public int PatientId { get; set; }
