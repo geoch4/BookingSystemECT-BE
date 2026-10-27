@@ -17,7 +17,7 @@ namespace BookingSystem.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.28")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -120,8 +120,9 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DepartmentId").HasMaxLength(120).HasColumnType("nvarchar(120)");
-                    b.Property<string>("TreatmentUnitId").HasMaxLength(120).HasColumnType("nvarchar(120)");
+                    b.Property<string>("DepartmentId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<int?>("DepartmentPriority")
                         .HasColumnType("int");
@@ -172,6 +173,10 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<int>("TreatmentType")
                         .HasColumnType("int");
 
+                    b.Property<string>("TreatmentUnitId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.HasKey("BookingId");
 
                     b.HasIndex("CreatedByUserId");
@@ -183,76 +188,6 @@ namespace BookingSystem.Infrastructure.Migrations
                         .HasFilter("[Status] = 1");
 
                     b.ToTable("Bookings");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.ReferralClinicalDetails", b =>
-                {
-                    b.Property<int>("BookingId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AdditionalInfo")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Allergies")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("AnesthesiaInfo")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("BloodPressure")
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("CompletedDocuments")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool?>("ContraindicationChecklistComplete")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("FastingConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Indication")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Medications")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool?>("MetalImplantsOrDevices")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PreviousTreatments")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("RtmsSessionPlan")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<bool?>("SeizureHistory")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SomaticRisk")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("TreatmentGoal")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("WeightKg")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("BookingId");
-
-                    b.ToTable("ReferralClinicalDetails");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Document", b =>
@@ -348,6 +283,37 @@ namespace BookingSystem.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BookingSystem.Domain.Entities.PatientCareUnit", b =>
+                {
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UnitId")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Kind")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientId", "UnitId", "Kind");
+
+                    b.HasIndex("UnitId", "Kind", "IsActive");
+
+                    b.ToTable("PatientCareUnits");
+                });
+
             modelBuilder.Entity("BookingSystem.Domain.Entities.ReferralAction", b =>
                 {
                     b.Property<int>("ReferralActionId")
@@ -389,6 +355,76 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.HasIndex("ReferralId");
 
                     b.ToTable("ReferralActions");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.ReferralClinicalDetails", b =>
+                {
+                    b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AdditionalInfo")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Allergies")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("AnesthesiaInfo")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("BloodPressure")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("CompletedDocuments")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool?>("ContraindicationChecklistComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("FastingConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Indication")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Medications")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool?>("MetalImplantsOrDevices")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PreviousTreatments")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("RtmsSessionPlan")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<bool?>("SeizureHistory")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SomaticRisk")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("TreatmentGoal")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("WeightKg")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("BookingId");
+
+                    b.ToTable("ReferralClinicalDetails");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Role", b =>
@@ -510,14 +546,17 @@ namespace BookingSystem.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("SessionVersion").IsRequired().HasMaxLength(32).HasColumnType("nvarchar(32)");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SessionVersion")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("UserId");
 
@@ -530,9 +569,7 @@ namespace BookingSystem.Infrastructure.Migrations
                 {
                     b.HasOne("BookingSystem.Domain.Entities.User", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CreatedByUserId");
 
                     b.HasOne("BookingSystem.Domain.Entities.Patient", "Patient")
                         .WithMany("Bookings")
@@ -541,6 +578,35 @@ namespace BookingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.Document", b =>
+                {
+                    b.HasOne("BookingSystem.Domain.Entities.User", "UploadedBy")
+                        .WithMany()
+                        .HasForeignKey("UploadedByUserId");
+
+                    b.Navigation("UploadedBy");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("BookingSystem.Domain.Entities.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId");
+
+                    b.Navigation("Recipient");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.PatientCareUnit", b =>
+                {
+                    b.HasOne("BookingSystem.Domain.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Patient");
                 });
@@ -554,28 +620,6 @@ namespace BookingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.Document", b =>
-                {
-                    b.HasOne("BookingSystem.Domain.Entities.User", "UploadedBy")
-                        .WithMany()
-                        .HasForeignKey("UploadedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UploadedBy");
-                });
-
-            modelBuilder.Entity("BookingSystem.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("BookingSystem.Domain.Entities.User", "Recipient")
-                        .WithMany()
-                        .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Recipient");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.StandbyEntry", b =>
@@ -614,19 +658,6 @@ namespace BookingSystem.Infrastructure.Migrations
                 {
                     b.Navigation("Users");
                 });
-            modelBuilder.Entity("BookingSystem.Domain.Entities.PatientCareUnit", b => {
-                b.Property<int>("PatientId").HasColumnType("int");
-                b.Property<string>("UnitId").HasMaxLength(120).HasColumnType("nvarchar(120)");
-                b.Property<string>("Kind").HasMaxLength(20).HasColumnType("nvarchar(20)");
-                b.Property<bool>("IsActive").HasColumnType("bit");
-                b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
-                b.Property<string>("Reason").IsRequired().HasMaxLength(500).HasColumnType("nvarchar(500)");
-                b.HasKey("PatientId", "UnitId", "Kind");
-                b.HasIndex("UnitId", "Kind", "IsActive");
-                b.ToTable("PatientCareUnits");
-                b.HasOne("BookingSystem.Domain.Entities.Patient", "Patient").WithMany().HasForeignKey("PatientId").OnDelete(DeleteBehavior.Cascade).IsRequired();
-                b.Navigation("Patient");
-            });
 #pragma warning restore 612, 618
         }
     }
