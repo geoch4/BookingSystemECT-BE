@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ect-rtms-bookingsystem-api-7d3f1c2a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
