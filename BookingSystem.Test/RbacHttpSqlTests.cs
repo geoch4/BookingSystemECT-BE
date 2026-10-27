@@ -37,9 +37,9 @@ public class RbacHttpSqlTests
         builder.Services.AddHttpContextAccessor();builder.Services.AddScoped<IAuditContext,HttpAuditContext>();builder.Services.AddScoped<AuditLogWriter>();
         builder.Services.AddMediatR(c=>c.RegisterServicesFromAssembly(typeof(GetAllUsersQuery).Assembly));
         builder.Services.AddScoped<AuthService>();
-        builder.Services.AddAccountJwtAuthentication(builder.Configuration).AddAccountAuthorization();
+        builder.Services.AddAccountJwtAuthentication(builder.Configuration).AddAccountAuthorization().AddLoginRateLimiting();
         builder.Services.AddControllers().AddApplicationPart(typeof(ReferralsController).Assembly);
-        await using var app=builder.Build();app.UseAuthentication();app.UseAuthorization();app.MapControllers();
+        await using var app=builder.Build();app.UseRouting();app.UseRateLimiter();app.UseAuthentication();app.UseAuthorization();app.MapControllers();
         using var scope=app.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<AppDbContext>();
         try
         {
