@@ -540,8 +540,6 @@ namespace BookingSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ClinicalDetails");
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Patient");
@@ -600,6 +598,11 @@ namespace BookingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("BookingSystem.Domain.Entities.Booking", b =>
+                {
+                    b.Navigation("ClinicalDetails");
                 });
 
             modelBuilder.Entity("BookingSystem.Domain.Entities.Patient", b =>
