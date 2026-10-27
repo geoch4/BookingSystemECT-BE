@@ -252,16 +252,16 @@ namespace BookingSystem.Infrastructure
         // changed and who changed it, not a second copy of the health information.
         private static readonly HashSet<string> ClinicalFreeTextProperties = new(StringComparer.OrdinalIgnoreCase)
         {
-            nameof(ReferralClinicalDetails.Indication),
-            nameof(ReferralClinicalDetails.AnesthesiaInfo),
-            nameof(ReferralClinicalDetails.SomaticRisk),
-            nameof(ReferralClinicalDetails.BloodPressure),
-            nameof(ReferralClinicalDetails.WeightKg),
-            nameof(ReferralClinicalDetails.Allergies),
-            nameof(ReferralClinicalDetails.Medications),
-            nameof(ReferralClinicalDetails.AdditionalInfo),
-            nameof(ReferralClinicalDetails.PreviousTreatments),
-            nameof(ReferralClinicalDetails.TreatmentGoal)
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Indication),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.AnesthesiaInfo),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.SomaticRisk),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.BloodPressure),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.WeightKg),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Allergies),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Medications),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.AdditionalInfo),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.PreviousTreatments),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.TreatmentGoal)
         };
 
         private static bool IsSensitiveProperty(string propertyName)
