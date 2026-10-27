@@ -29,6 +29,7 @@ namespace BookingSystem.Infrastructure
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<ReferralAction> ReferralActions => Set<ReferralAction>();
+        public DbSet<ReferralClinicalDetails> ReferralClinicalDetails => Set<ReferralClinicalDetails>();
         public DbSet<StaffingStatus> StaffingStatuses => Set<StaffingStatus>();
         public DbSet<StandbyEntry> StandbyEntries => Set<StandbyEntry>();
 
@@ -44,11 +45,19 @@ namespace BookingSystem.Infrastructure
             // Hide soft-deleted users from normal queries without requiring filters in every handler.
             modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
 
-            // SQL Server enforces one active booking per minute, which closes concurrent double-booking races.
+            // A confirmed booking owns its minute at its treatment unit. Pending referrals never
+            // occupy a slot, and other units keep their own schedules. SQL Server treats NULL as one
+            // value in a unique index, so confirmed bookings without a unit still guard each other.
             modelBuilder.Entity<Booking>()
-                .HasIndex(b => b.Date)
+                .HasIndex(b => new { b.TreatmentUnitId, b.Date })
                 .IsUnique()
-                .HasFilter($"[{nameof(Booking.Status)}] <> {(int)BookingStatus.Cancelled}");
+                .HasFilter($"[{nameof(Booking.Status)}] = {(int)BookingStatus.Confirmed}");
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.ClinicalDetails)
+                .WithOne(d => d.Booking)
+                .HasForeignKey<ReferralClinicalDetails>(d => d.BookingId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Historical records should remain visible even if the associated user is later soft-deleted.
             modelBuilder.Entity<Booking>()
@@ -239,10 +248,27 @@ namespace BookingSystem.Infrastructure
             return JsonSerializer.Serialize(changedFields);
         }
 
+        // Clinical free text is stored once, in its own table; the audit trail records that it
+        // changed and who changed it, not a second copy of the health information.
+        private static readonly HashSet<string> ClinicalFreeTextProperties = new(StringComparer.OrdinalIgnoreCase)
+        {
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Indication),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.AnesthesiaInfo),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.SomaticRisk),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.BloodPressure),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.WeightKg),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Allergies),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.Medications),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.AdditionalInfo),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.PreviousTreatments),
+            nameof(BookingSystem.Domain.Entities.ReferralClinicalDetails.TreatmentGoal)
+        };
+
         private static bool IsSensitiveProperty(string propertyName)
         {
             return propertyName.Contains("Password", StringComparison.OrdinalIgnoreCase) ||
-                   propertyName.Contains("SocialSecurityNumber", StringComparison.OrdinalIgnoreCase);
+                   propertyName.Contains("SocialSecurityNumber", StringComparison.OrdinalIgnoreCase) ||
+                   ClinicalFreeTextProperties.Contains(propertyName);
         }
 
         private sealed record PendingAuditLog(EntityEntry Entry, AuditLog AuditLog);

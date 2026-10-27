@@ -68,10 +68,41 @@ public class CreateBookingDtoValidator : AbstractValidator<CreateBookingDto>
         RuleFor(x => x.IntegrationStatus)
             .MaximumLength(40).WithMessage("IntegrationStatus can be at most 40 characters");
 
+        RuleFor(x => x.ClinicalDetails!)
+            .SetValidator(new ReferralClinicalDetailsDtoValidator())
+            .When(x => x.ClinicalDetails is not null);
+
         When(x => x.Status == BookingSystem.Domain.Enums.BookingStatus.Cancelled, () =>
         {
             RuleFor(x => x.CancellationReason)
                 .NotEmpty().WithMessage("CancellationReason is required when a booking is cancelled");
         });
+    }
+}
+
+public class ReferralClinicalDetailsDtoValidator : AbstractValidator<ReferralClinicalDetailsDto>
+{
+    private static readonly string[] SessionPlans = ["single", "double"];
+
+    public ReferralClinicalDetailsDtoValidator()
+    {
+        RuleFor(x => x.Indication).MaximumLength(2000);
+        RuleFor(x => x.AnesthesiaInfo).MaximumLength(2000);
+        RuleFor(x => x.SomaticRisk).MaximumLength(2000);
+        RuleFor(x => x.BloodPressure).MaximumLength(40);
+        RuleFor(x => x.WeightKg).MaximumLength(20);
+        RuleFor(x => x.Allergies).MaximumLength(500);
+        RuleFor(x => x.Medications).MaximumLength(2000);
+        RuleFor(x => x.AdditionalInfo).MaximumLength(2000);
+        RuleFor(x => x.PreviousTreatments).MaximumLength(2000);
+        RuleFor(x => x.TreatmentGoal).MaximumLength(1000);
+
+        RuleFor(x => x.RtmsSessionPlan)
+            .Must(plan => plan is null || Array.Exists(SessionPlans, p => p == plan))
+            .WithMessage("RtmsSessionPlan must be 'single' or 'double'");
+
+        RuleFor(x => x.CompletedDocuments)
+            .Must(docs => docs.Count <= 12 && docs.TrueForAll(d => d.Length <= 40 && !d.Contains(',')))
+            .WithMessage("CompletedDocuments has too many or invalid entries");
     }
 }
